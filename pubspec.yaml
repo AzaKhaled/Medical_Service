@@ -34,14 +34,18 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
+  flutter_local_notifications: ^19.4.2
+  flutter_rating_bar: ^4.0.1
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.2.1
   font_awesome_flutter: ^10.10.0
   get_it: ^8.2.0
   image_picker: ^1.2.0
   modal_progress_hud_nsn: ^0.5.1
+  shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.1
   supabase_flutter: ^2.10.1
+  timeago: ^3.7.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0

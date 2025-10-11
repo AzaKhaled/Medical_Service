@@ -1,0 +1,6 @@
+- [x] Redesign doctor card with Card, elevation, gradient, icon
+- [x] Improve day selection with Cards, icons, animations
+- [x] Redesign time slots as Chips
+- [x] Use theme text styles and spacing
+- [x] Update confirm button to CustomButton
+- [ ] Test the UI
