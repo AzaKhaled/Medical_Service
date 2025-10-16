@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
+import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/custom_search.dart';
 
-class HeaderSection extends StatelessWidget {
+class HeaderSection extends StatefulWidget {
   const HeaderSection({
     super.key,
     this.name,
@@ -16,11 +18,33 @@ class HeaderSection extends StatelessWidget {
   final TextEditingController searchController;
   final Function(String) onSearchChanged;
 
+  @override
+  State<HeaderSection> createState() => _HeaderSectionState();
+}
+
+class _HeaderSectionState extends State<HeaderSection> {
   bool _isValidImageUrl(String? url) {
     return url != null &&
         url.isNotEmpty &&
         (url.startsWith('http://') || url.startsWith('https://'));
   }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // final homeCubit = context.read<HomeCubit>();
+
+  //   // ✅ استدعاء بيانات المستخدم عشان الاسم والصورة تظهر في الهيدر
+  //   homeCubit.getCurrentUserData();
+  
+  // }
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    context.read<HomeCubit>().getCurrentUserData();
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -55,15 +79,15 @@ class HeaderSection extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 25,
                   backgroundColor: Colors.white,
-                  backgroundImage: _isValidImageUrl(avatarUrl)
-                      ? NetworkImage(avatarUrl!)
+                  backgroundImage: _isValidImageUrl(widget.avatarUrl)
+                      ? NetworkImage(widget.avatarUrl!)
                       : null,
-                  onBackgroundImageError: _isValidImageUrl(avatarUrl)
+                  onBackgroundImageError: _isValidImageUrl(widget.avatarUrl)
                       ? (_, __) {
-                          debugPrint('Error loading image: $avatarUrl');
+                          debugPrint('Error loading image: ${widget.avatarUrl}');
                         }
                       : null,
-                  child: !_isValidImageUrl(avatarUrl)
+                  child: !_isValidImageUrl(widget.avatarUrl)
                       ? const Icon(Icons.person, color: AppColors.primaryColor)
                       : null,
                 ),
@@ -82,7 +106,7 @@ class HeaderSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            name != null ? 'Hello $name' : 'Hello...',
+            widget.name != null ? 'Hello ${widget.name}' : 'Hello...',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -97,8 +121,8 @@ class HeaderSection extends StatelessWidget {
             children: [
               Expanded(
                 child: CustomSearch(
-                  controller: searchController,
-                  onChanged: onSearchChanged,
+                  controller: widget.searchController,
+                  onChanged: widget.onSearchChanged,
                   hintText: 'Search',
                 ),
               ),

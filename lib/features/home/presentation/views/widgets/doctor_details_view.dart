@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
+import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/appointment_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_view.dart';
@@ -54,20 +55,29 @@ Future<void> fetchReviewsCount() async {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    widget.doctor['image_url'] ?? "assets/images/doctor.jfif",
-                    height: 220,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                      "assets/images/doctor.jfif",
-                      height: 220,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+  borderRadius: BorderRadius.circular(16),
+  child: (widget.doctor['image_url'] != null &&
+          widget.doctor['image_url'].toString().isNotEmpty)
+      ? Image.network(
+          widget.doctor['image_url'],
+          height: 220,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            "assets/images/doctor.jfif",
+            height: 220,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        )
+      : Image.asset(
+          "assets/images/doctor.jfif",
+          height: 220,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+),
+
                 Positioned(
                   top: 12,
                   right: 12,
@@ -79,7 +89,7 @@ Future<void> fetchReviewsCount() async {
                         color: Colors.red,
                       ),
                       onPressed: () {
-                        context.read<HomeCubit>().addToFavorites(widget.doctor['id'].toString());
+                        context.read<FavoriteCubit>().addToFavorites(widget.doctor['id'].toString());
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Added to favorites')),
                         );

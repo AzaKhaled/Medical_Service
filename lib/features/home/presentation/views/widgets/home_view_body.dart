@@ -21,25 +21,23 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   @override
   void initState() {
     super.initState();
-    final homeCubit = context.read<HomeCubit>();
 
-    // ✅ استدعاء بيانات المستخدم عشان الاسم والصورة تظهر في الهيدر
-    homeCubit.getCurrentUserData();
-     homeCubit.initNotifications();
-    homeCubit.getDoctors();
-    homeCubit.getCategories();
-    homeCubit.getTopRatedDoctors();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cubit = context.read<HomeCubit>();
+      cubit.getCategories();
+      cubit.getDoctors();
+      cubit.getTopRatedDoctors();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 🟡 BlocBuilder عشان نجيب الاسم والصورة من Cubit
         BlocBuilder<HomeCubit, HomeStates>(
           builder: (context, state) {
-            final homeCubit = context.read<HomeCubit>();
-            final user = homeCubit.currentUserData; // جاي من Cubit
+            final homeCubit = context.watch<HomeCubit>();
+            final user = homeCubit.currentUserData;
 
             return HeaderSection(
               name: user?['name'],
@@ -49,7 +47,6 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                 context.read<HomeCubit>().searchDoctors(value);
               },
             );
-            ;
           },
         ),
 
@@ -58,68 +55,70 @@ class _HomeViewBodyState extends State<HomeViewBody> {
         const SizedBox(height: 10),
 
         Expanded(
-  child: BlocBuilder<HomeCubit, HomeStates>(
-    builder: (context, state) {
-      if (state is HomeGetDoctorsLoadingState) {
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          itemCount: 5,
-          itemBuilder: (context, index) => const DoctorCardShimmer(),
-        );
-      }
-
-      if (state is HomeGetDoctorsErrorState) {
-        debugPrint('Error fetching doctors: ${state.error}');
-        return Center(child: Text("error try again later"));
-      }
-
-      if (state is HomeGetDoctorsSuccessState ||
-          state is HomeGetTopRatedDoctorsSuccessState) {
-        final doctors = state is HomeGetDoctorsSuccessState
-            ? state.doctors
-            : (state as HomeGetTopRatedDoctorsSuccessState).doctors;
-
-        if (doctors.isEmpty) {
-          return const Center(child: Text("No doctors found"));
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          itemCount: doctors.length,
-          itemBuilder: (context, index) {
-            final doctor = doctors[index];
-            return DoctorCard(
-              imageUrl: doctor['image_url'] ?? "assets/images/doctor.jfif",
-              name: doctor['name'] ?? "Unknown",
-              level: doctor['specialty_name'] ?? "Unknown",
-              workTime: doctor['working_hours'] ?? "N/A",
-              price: doctor['price']?.toString() ?? "0",
-              rating: double.parse(
-                (double.tryParse(doctor['rating']?.toString() ?? "0") ?? 0.0)
-                    .toStringAsFixed(1),
-              ),
-              onDetails: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DoctorDetailsView(doctor: doctor),
-                  ),
+          child: BlocBuilder<HomeCubit, HomeStates>(
+            builder: (context, state) {
+              if (state is HomeGetDoctorsLoadingState) {
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  itemCount: 5,
+                  itemBuilder: (context, index) => const DoctorCardShimmer(),
                 );
-              },
-            );
-          },
-        );
-      }
+              }
 
-      return const SizedBox();
-    },
-  ),
-),
-],
+              if (state is HomeGetDoctorsErrorState) {
+                debugPrint('Error fetching doctors: ${state.error}');
+                return const Center(child: Text("error try again later"));
+              }
+
+              if (state is HomeGetDoctorsSuccessState ||
+                  state is HomeGetTopRatedDoctorsSuccessState) {
+                final doctors = state is HomeGetDoctorsSuccessState
+                    ? state.doctors
+                    : (state as HomeGetTopRatedDoctorsSuccessState).doctors;
+
+                if (doctors.isEmpty) {
+                  return const Center(child: Text("No doctors found"));
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: doctors.length,
+                  itemBuilder: (context, index) {
+                    final doctor = doctors[index];
+                    return DoctorCard(
+                      imageUrl:
+                          doctor['image_url'] ?? "assets/images/doctor.jfif",
+                      name: doctor['name'] ?? "Unknown",
+                      level: doctor['specialty_name'] ?? "Unknown",
+                      workTime: doctor['working_hours'] ?? "N/A",
+                      price: doctor['price']?.toString() ?? "0",
+                      rating: double.parse(
+                        (double.tryParse(doctor['rating']?.toString() ?? "0") ??
+                                0.0)
+                            .toStringAsFixed(1),
+                      ),
+                      onDetails: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DoctorDetailsView(doctor: doctor),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              }
+
+              return const SizedBox();
+            },
+          ),
+        ),
+      ],
     );
   }
 }
-
 
 //  مثال: السماح للمستخدم بقراءة الإشعارات الخاصة به فقط
 // CREATE POLICY "Users can read their own notifications"

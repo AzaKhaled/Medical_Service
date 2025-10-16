@@ -37,8 +37,8 @@ class ServicesView extends StatelessWidget {
 
     final pages = categories.isNotEmpty
         ? List<Widget>.generate((categories.length / 4).ceil(), (pageIndex) {
-            final start = pageIndex * 4;
-            final end = (start + 4).clamp(0, categories.length);
+            final start = pageIndex * 3;
+            final end = (start + 3).clamp(0, categories.length);
             final visibleItems = categories.sublist(start, end);
 
             return Row(

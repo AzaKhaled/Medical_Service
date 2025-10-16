@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -40,6 +41,7 @@ class HomeCubit extends Cubit<HomeStates> {
         password: loginPasswordController.text.trim(),
       );
       if (response.user != null) {
+        await updateFcmToken();
         loginEmailController.clear();
         loginPasswordController.clear();
         // debugPrint("Login successful: ${response.user}");
@@ -72,7 +74,7 @@ class HomeCubit extends Cubit<HomeStates> {
       // debugPrint("🔹 Signup response: $response");
 
       if (response.user != null) {
-        debugPrint("✅ Signup succeeded!");
+        // debugPrint("✅ Signup succeeded!");
 
         // ✅ شيل الـ saveUserToTable خالص - الـ trigger هيعملها
 
@@ -119,7 +121,7 @@ class HomeCubit extends Cubit<HomeStates> {
           .select()
           .single();
 
-      debugPrint("✅ User saved successfully: $response");
+      // debugPrint("✅ User saved successfully: $response");
     } catch (e) {
       // debugPrint("❌ Error saving user to table: $e");
       // لا ترمي الخطأ، خلي التسجيل يكمل
@@ -141,13 +143,13 @@ class HomeCubit extends Cubit<HomeStates> {
 
       if (response != null) {
         currentUserData = response; // ✅ هنا نخزن البيانات
-        debugPrint("📥 Current user data: $response");
+        // debugPrint("📥 Current user data: $response");
         emit(HomeGetUserSuccessState(response));
       } else {
         emit(HomeGetUserErrorState("User data not found"));
       }
     } catch (e) {
-      debugPrint("❌ Error fetching user data: $e");
+      // debugPrint("❌ Error fetching user data: $e");
       emit(HomeGetUserErrorState(e.toString()));
     }
   }
@@ -180,7 +182,7 @@ class HomeCubit extends Cubit<HomeStates> {
   // }
   List<dynamic> allDoctors = []; // الأصلية
   List<dynamic> filteredDoctors = []; // للعرض بعد البحث
-
+  // List<dynamic> favorites = [];
   Future<void> getDoctors() async {
     emit(HomeGetDoctorsLoadingState());
     try {
@@ -267,78 +269,80 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   // ✅ Add Doctor to Favorites
-  Future<void> addToFavorites(String doctorId) async {
-    emit(HomeAddFavoriteLoadingState());
-    try {
-      final userId = supabase.auth.currentUser!.id;
+//   Future<void> addToFavorites(String doctorId) async {
+//     emit(HomeAddFavoriteLoadingState());
+//     try {
+//       final userId = supabase.auth.currentUser!.id;
 
-      // 🛑 تأكد إن الدكتور مش مضاف من قبل
-      final existing = await supabase
-          .from('favorites')
-          .select()
-          .eq('user_id', userId)
-          .eq('doctor_id', doctorId)
-          .maybeSingle();
+//       // 🛑 تأكد إن الدكتور مش مضاف من قبل
+//       final existing = await supabase
+//           .from('favorites')
+//           .select()
+//           .eq('user_id', userId)
+//           .eq('doctor_id', doctorId)
+//           .maybeSingle();
 
-      if (existing != null) {
-        emit(HomeAddFavoriteAlreadyExistsState());
-        return;
-      }
+//       if (existing != null) {
+//         emit(HomeAddFavoriteAlreadyExistsState());
+//         return;
+//       }
 
-      // ✅ أضف الدكتور
-      final response = await supabase.from('favorites').insert({
-        'user_id': userId,
-        'doctor_id': doctorId,
-      }).select();
+//       // ✅ أضف الدكتور
+//       final response = await supabase.from('favorites').insert({
+//         'user_id': userId,
+//         'doctor_id': doctorId,
+//       }).select();
 
-      // ✅ مباشرة بعد الإضافة، استدعِ getFavorites لتحديث القائمة
-      await getFavorites();
+//       // ✅ مباشرة بعد الإضافة، استدعِ getFavorites لتحديث القائمة
+//       await getFavorites();
+//       debugPrint("✅ Added to favorites: $response");
+//       favorites = response;
+//       emit(HomeAddFavoriteSuccessState(response));
+//     } catch (e) {
+//       emit(HomeAddFavoriteErrorState(e.toString()));
+//     }
+//   }
 
-      emit(HomeAddFavoriteSuccessState(response));
-    } catch (e) {
-      emit(HomeAddFavoriteErrorState(e.toString()));
-    }
-  }
+//   // ✅ Remove Doctor from Favorites
+//   Future<void> removeFromFavorites(String doctorId) async {
+//     emit(HomeRemoveFavoriteLoadingState());
+//     try {
+//       final userId = supabase.auth.currentUser!.id;
+//       await supabase
+//           .from('favorites')
+//           .delete()
+//           .eq('user_id', userId)
+//           .eq('doctor_id', doctorId);
 
-  // ✅ Remove Doctor from Favorites
-  Future<void> removeFromFavorites(String doctorId) async {
-    emit(HomeRemoveFavoriteLoadingState());
-    try {
-      final userId = supabase.auth.currentUser!.id;
-      await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', userId)
-          .eq('doctor_id', doctorId);
+//       // debugPrint("💔 Removed from favorites: $doctorId");
 
-      // debugPrint("💔 Removed from favorites: $doctorId");
+//       // بعد الحذف أرجع هات الفيفورتس من جديد
+//       await getFavorites();
+//     } catch (e) {
+//       // debugPrint("❌ Error removing from favorites: $e");
+//       emit(HomeRemoveFavoriteErrorState(e.toString()));
+//     }
+//   }
 
-      // بعد الحذف أرجع هات الفيفورتس من جديد
-      await getFavorites();
-    } catch (e) {
-      // debugPrint("❌ Error removing from favorites: $e");
-      emit(HomeRemoveFavoriteErrorState(e.toString()));
-    }
-  }
+//   // ✅ Get All Favorites for Logged User
+//   Future<void> getFavorites() async {
+//   emit(HomeGetFavoritesLoadingState());
+//   try {
+//     final userId = supabase.auth.currentUser!.id;
 
-  // ✅ Get All Favorites for Logged User
-  Future<void> getFavorites() async {
-    emit(HomeGetFavoritesLoadingState());
-    try {
-      final userId = supabase.auth.currentUser!.id;
+//     final response = await supabase
+//         .from('favorites')
+//         .select('doctor_id, doctors(*)')
+//         .eq('user_id', userId);
 
-      final response = await supabase
-          .from('favorites')
-          .select('doctor_id, doctors(*)') // بيرجع بيانات الدكتور نفسه
-          .eq('user_id', userId);
+//     debugPrint("📥 Favorites: $response");
 
-      // debugPrint("📥 Favorites: $response");
-      emit(HomeGetFavoritesSuccessState(response));
-    } catch (e) {
-      // debugPrint("❌ Error getting favorites: $e");
-      emit(HomeGetFavoritesErrorState(e.toString()));
-    }
-  }
+//     emit(HomeGetFavoritesSuccessState(response));
+//   } catch (e) {
+//     debugPrint("❌ Error getting favorites: $e");
+//     emit(HomeGetFavoritesErrorState(e.toString()));
+//   }
+// }
 
   // ✅ Add Review (تعليق جديد)
   Future<void> addReview({
@@ -588,7 +592,7 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   Future<void> initNotifications() async {
-    // تهيئة flutter_local_notifications
+    // ✅ تهيئة flutter_local_notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -597,7 +601,62 @@ class HomeCubit extends Cubit<HomeStates> {
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-    // ✅ اشتراك في Realtime Table
+    // ✅ جلب الإشعارات القديمة
+    await fetchOldNotifications();
+
+    // ✅ الاشتراك في التغييرات الجديدة
+    _subscribeToNotifications();
+  }
+
+  Future<void> fetchOldNotifications() async {
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) return;
+
+    // 👇 الحصول على ID المستخدم من جدول users
+    final userResponse = await Supabase.instance.client
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .maybeSingle();
+
+    if (userResponse == null) {
+      // print('⚠️ لم يتم العثور على المستخدم في جدول users');
+      return;
+    }
+
+    final userIdFromTable = userResponse['id'];
+    // print('🆔 User ID from users table: $userIdFromTable');
+
+    // 👇 جلب الإشعارات القديمة الخاصة بالمستخدم
+    final notificationsResponse = await Supabase.instance.client
+        .from('notifications')
+        .select()
+        .eq('user_id', userIdFromTable)
+        .order('created_at', ascending: false);
+
+    // print('📥 Old notifications for $userIdFromTable: $notificationsResponse');
+
+    notifications
+      ..clear()
+      ..addAll(List<Map<String, dynamic>>.from(notificationsResponse));
+
+    emit(HomeNotificationsLoadedState(notifications));
+  }
+
+  void _subscribeToNotifications() async {
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) return;
+
+    final userResponse = await Supabase.instance.client
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .maybeSingle();
+
+    if (userResponse == null) return;
+
+    final userIdFromTable = userResponse['id'];
+
     Supabase.instance.client
         .channel('public:notifications')
         .onPostgresChanges(
@@ -606,14 +665,16 @@ class HomeCubit extends Cubit<HomeStates> {
           table: 'notifications',
           callback: (payload) {
             final newRecord = payload.newRecord;
+            if (newRecord['user_id'] != userIdFromTable) {
+              return; // 👌 تجاهل الإشعارات اللي مش لليوزر ده
+            }
+
             final title = newRecord['title'] ?? 'تنبيه جديد';
             final body = newRecord['body'] ?? '';
 
-            // عرض إشعار محلي
             showLocalNotification(title, body);
 
-            // إضافة الإشعار إلى الليستة المحلية
-            notifications.add(newRecord);
+            notifications.insert(0, newRecord);
             emit(HomeNewNotificationState());
           },
         )
@@ -635,10 +696,34 @@ class HomeCubit extends Cubit<HomeStates> {
     );
 
     await flutterLocalNotificationsPlugin.show(
-      0,
+      DateTime.now().millisecondsSinceEpoch ~/ 1000, // رقم مميز للإشعار
       title,
       body,
       notificationDetails,
     );
+  }
+
+  Future<void> updateFcmToken() async {
+    try {
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return;
+
+      await supabase
+          .from('users')
+          .update({'fcm_token': token})
+          .eq('auth_id', user.id);
+
+      // debugPrint('✅ FCM token updated: $token');
+    } catch (e) {
+      debugPrint('❌ Error updating FCM token: $e');
+    }
+  }
+
+  void markNotificationAsRead(int index) {
+    notifications[index]['isRead'] = true;
+    emit(HomeNotificationsUpdatedState()); // اعملي State لتحديث الـ UI
   }
 }

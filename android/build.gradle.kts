@@ -2,6 +2,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://plugins.gradle.org/m2/") } // 👈 مهم لو هتضيف OneSignal كمان
     }
 }
 

@@ -3,109 +3,139 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/utils/constants/my_bloc_observer.dart';
 import 'package:medical_service_app/core/utils/constants/routes.dart';
+import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-// 🧭 مفتاح الـ Navigator
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 // 🔔 متغير الإشعارات المحلية
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//     FlutterLocalNotificationsPlugin();
+
+/// 🧠 دالة يتم استدعاؤها لما توصلك إشعارات والتطبيق في الخلفية أو مقفول
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  final user = Supabase.instance.client.auth.currentUser;
+  if (user == null) return;
+
+  final userResponse = await Supabase.instance.client
+      .from('users')
+      .select('id')
+      .eq('auth_id', user.id)
+      .maybeSingle();
+
+  if (userResponse == null) return;
+  final userIdFromTable = userResponse['id'];
+
+  final title = message.notification?.title ?? 'تنبيه جديد';
+  final body = message.notification?.body ?? '';
+
+  await Supabase.instance.client.from('notifications').insert({
+    'user_id': userIdFromTable,
+    'title': title,
+    'body': body,
+  });
+
+  print('📩 إشعار وصل في الخلفية: $title');
+}
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ 1) تهيئة Supabase
+  // ✅ 1) تهيئة Firebase
+  await Firebase.initializeApp();
+
+  // ✅ 2) إعداد FCM
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // 🔐 طلب الإذن من المستخدم (مهم لـ iOS)
+  await messaging.requestPermission();
+
+  // 🧠 استقبال رسائل في الخلفية
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // 🧠 استقبال رسائل أثناء فتح التطبيق (Foreground)
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+  print('📨 إشعار Foreground: ${message.notification?.title}');
+  
+  final user = Supabase.instance.client.auth.currentUser;
+  if (user != null) {
+  await HomeCubit().updateFcmToken();
+}
+  if (user == null) return;
+
+  // 🆔 هات الـ id من جدول users
+ final userResponse = await Supabase.instance.client
+    .from('users')
+    .select('id')
+    .eq('auth_id', user.id)
+    .maybeSingle();
+
+if (userResponse == null) return;
+
+final userIdFromTable = userResponse['id'];
+final title = message.notification?.title ?? 'تنبيه جديد';
+final body = message.notification?.body ?? '';
+
+await Supabase.instance.client.from('notifications').insert({
+  'user_id': userIdFromTable,
+  'title': title,
+  'body': body,
+});
+
+print('📩 إشعار Foreground: $title');
+
+      
+});
+
+
+  // ✅ 3) طباعة الـ Token علشان تبعتي إشعارات للموبايل ده
+  String? token = await messaging.getToken();
+ print('🔑 FCM Token: $token');
+
+  // ✅ 4) Supabase initialization
   await Supabase.initialize(
     url: 'https://brubbjtkjdzpbeekrdcx.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJydWJianRramR6cGJlZWtyZGN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNjk3MDQsImV4cCI6MjA3Mzk0NTcwNH0.KLgMHO0icafJXcJKftmZxOJPqDaS1B5tvLWaRivxPB4',
   );
 
-  // ✅ 2) تهيئة الإشعارات المحلية
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-  );
-
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  // 🧪 تجربة إشعار عند التشغيل
-  await showLocalNotification('مرحبًا 👋', 'الإشعارات المحلية تعمل بنجاح ✅');
-
-  // ✅ 3) Bloc Observer
   Bloc.observer = MyBlocObserver();
 
-  // ✅ 4) الاستماع لتحديثات جدول notifications من Supabase Realtime
-  Supabase.instance.client
-      .channel('public:notifications')
-      .onPostgresChanges(
-        event: PostgresChangeEvent.insert,
-        schema: 'public',
-        table: 'notifications',
-        callback: (payload) {
-          final newRecord = payload.newRecord;
-          final title = newRecord['title'] ?? 'تنبيه جديد';
-          final body = newRecord['body'] ?? '';
-          showLocalNotification(title, body);
-        },
-      )
-      .subscribe();
-
-  runApp(const MyApp());
+  runApp(const MedicalService());
 }
 
-// 🛠️ دالة عرض الإشعار المحلي
-Future<void> showLocalNotification(String title, String body) async {
-  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'notif_channel', // معرف القناة
-    'Notifications', // اسم القناة
-    importance: Importance.max,
-    priority: Priority.high,
-    showWhen: true,
-  );
-
-  const NotificationDetails notificationDetails = NotificationDetails(
-    android: androidDetails,
-  );
-
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    title,
-    body,
-    notificationDetails,
-  );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MedicalService extends StatelessWidget {
+  const MedicalService({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => HomeCubit(),
-      child: BlocBuilder<HomeCubit, HomeStates>(
-        builder: (context, state) {
-          return ScreenUtilInit(
-            designSize: const Size(360, 690),
-            minTextAdapt: true,
-            splitScreenMode: true,
-            builder: (context, child) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                navigatorKey: navigatorKey,
-                routes: Routes.routes,
-                initialRoute: Routes.loginRoute,
-              );
-            },
+    return MultiBlocProvider(
+  providers: [
+    BlocProvider(create: (context) => HomeCubit()..initNotifications()),
+    BlocProvider(create: (context) => FavoriteCubit()..getFavorites()), // 🟢 أضفها هنا
+  ],
+  child: BlocBuilder<HomeCubit, HomeStates>(
+    builder: (context, state) {
+      return ScreenUtilInit(
+        designSize: const Size(360, 690),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            routes: Routes.routes,
+            initialRoute: Routes.loginRoute,
           );
         },
-      ),
-    );
-  }
+      );
+    },
+  ),
+);
+}
 }
