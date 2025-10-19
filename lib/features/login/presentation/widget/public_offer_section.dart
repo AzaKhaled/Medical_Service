@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 
-
-
 class PublicOffireSection extends StatelessWidget {
   const PublicOffireSection({super.key});
 

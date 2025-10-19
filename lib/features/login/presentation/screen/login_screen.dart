@@ -18,8 +18,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeCubit = context.read<HomeCubit>();
-
     return BlocConsumer<HomeCubit, HomeStates>(
       listener: (context, state) {
         if (state is HomeLoginSuccessState) {
@@ -42,110 +40,113 @@ class LoginScreen extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Form(
-                key: homeCubit.loginFormKey,
-                child: Column(
-                  children: [
-                    SizedBox(height: 15.h),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 70,
-                          height: 70,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFF3E69FE),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Form(
+                  key: homeCubit.loginFormKey,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 15.h),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 70,
+                            height: 70,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFF3E69FE),
+                            ),
                           ),
-                        ),
-                        const Icon(
-                          Icons.health_and_safety,
-                          size: 36,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 32.h),
-                    const Text('Welcome Back', style: TextStyles.montserrat700_36),
-                    SizedBox(height: 24.h),
-
-                    // Email
-                    CustomTextFormField(
-                      controller: homeCubit.loginEmailController,
-                      preffixIcon: const Icon(Icons.person_rounded),
-                      hintText: 'Enter your email',
-                      textInputType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Password
-                    PasswordField(
-                      controller: homeCubit.loginPasswordController,
-                      hintText: 'Enter your password',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter password';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    SizedBox(height: 30.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ResetPasswordView(),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'Forgot Password?',
-                            style: TextStyles.montserrat400_12_red,
+                          const Icon(
+                            Icons.health_and_safety,
+                            size: 36,
+                            color: Colors.white,
                           ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 35.h),
-                    CustomButton(
-                      onPressed: () {
-                        if (homeCubit.loginFormKey.currentState!.validate()) {
-                          homeCubit.login();
-                        }
-                      },
-                      text: state is HomeLoginLoadingState
-                          ? "Loading..."
-                          : "Login",
-                    ),
-                    SizedBox(height: 16.h),
-
-                    const OrDivider(),
-                    SizedBox(height: 16.h),
-
-                    HaveAnAccountSection(
-                      leadingText: 'Don\'t have an account?',
-                      actionText: ' Sign Up',
-                      onTap: () {
-                        context.push<Widget>(Routes.signupRoute);
-                      },
-                    ),
-                  ],
+                        ],
+                      ),
+            
+                      SizedBox(height: 32.h),
+                      const Text(
+                        'Welcome Back',
+                        style: TextStyles.montserrat700_36,
+                      ),
+                      SizedBox(height: 24.h),
+            
+                      // Email
+                      CustomTextFormField(
+                        controller: homeCubit.loginEmailController,
+                        preffixIcon: const Icon(Icons.person_rounded),
+                        hintText: 'Enter your email',
+                        textInputType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter email';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+            
+                      // Password
+                      PasswordField(
+                        controller: homeCubit.loginPasswordController,
+                        hintText: 'Enter your password',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter password';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 30.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute<Object>(
+                                  builder: (context) => const ResetPasswordView(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Forgot Password?',
+                              style: TextStyles.montserrat400_12_red,
+                            ),
+                          ),
+                        ],
+                      ),
+            
+                      SizedBox(height: 35.h),
+                      CustomButton(
+                        onPressed: () {
+                          if (homeCubit.loginFormKey.currentState!.validate()) {
+                            homeCubit.login();
+                          }
+                        },
+                        text: state is HomeLoginLoadingState
+                            ? "Loading..."
+                            : "Login",
+                      ),
+                      SizedBox(height: 16.h),
+            
+                      const OrDivider(),
+                      SizedBox(height: 16.h),
+            
+                      HaveAnAccountSection(
+                        leadingText: 'Don\'t have an account?',
+                        actionText: ' Sign Up',
+                        onTap: () {
+                          context.push<Widget>(Routes.signupRoute);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

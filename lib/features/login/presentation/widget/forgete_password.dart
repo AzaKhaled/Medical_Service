@@ -32,7 +32,7 @@ class _ForgetedPasswordState extends State<ForgetedPassword> {
 
               Center(
                 child: Text(
-               ('Forget Password'),
+                  ('Forget Password'),
                   style: TextStyles.montserrat700_36.copyWith(fontSize: 28.sp),
                 ),
               ),
@@ -66,9 +66,8 @@ class _ForgetedPasswordState extends State<ForgetedPassword> {
                   const Text('*', style: TextStyles.montserrat400_12_red),
                   SizedBox(width: 4.w),
                   const Flexible(
-                    child: Text((
-                        'We will send you a message to reset your password'
-                      ),
+                    child: Text(
+                      ('We will send you a message to reset your password'),
                       softWrap: true,
                     ),
                   ),
@@ -90,12 +89,11 @@ class _ForgetedPasswordState extends State<ForgetedPassword> {
                         email,
                         redirectTo: 'myapp://reset-password',
                       );
-
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text((
-                              'Password reset email sent. Check your inbox.'
-                            ),
+                          content: Text(
+                            ('Password reset email sent. Check your inbox.'),
                           ),
                           backgroundColor: Colors.green,
                         ),
@@ -111,9 +109,7 @@ class _ForgetedPasswordState extends State<ForgetedPassword> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                            (
-                              'An unexpected error occurred'
-                            ),
+                            ('An unexpected error occurred'),
                           ),
                           backgroundColor: Colors.red,
                         ),

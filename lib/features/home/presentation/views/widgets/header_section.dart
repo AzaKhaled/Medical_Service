@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/custom_search.dart';
@@ -16,7 +15,7 @@ class HeaderSection extends StatefulWidget {
   final String? name;
   final String? avatarUrl;
   final TextEditingController searchController;
-  final Function(String) onSearchChanged;
+  final void Function(String) onSearchChanged;
 
   @override
   State<HeaderSection> createState() => _HeaderSectionState();
@@ -36,15 +35,13 @@ class _HeaderSectionState extends State<HeaderSection> {
 
   //   // ✅ استدعاء بيانات المستخدم عشان الاسم والصورة تظهر في الهيدر
   //   homeCubit.getCurrentUserData();
-  
+
   // }
-@override
-void initState() {
-  super.initState();
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    context.read<HomeCubit>().getCurrentUserData();
-  });
-}
+  @override
+  void initState() {
+    super.initState();
+      homeCubit.getCurrentUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +66,7 @@ void initState() {
                   border: Border.all(color: Colors.white, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       spreadRadius: 1,
                       blurRadius: 4,
                       offset: const Offset(0, 2),
@@ -83,8 +80,10 @@ void initState() {
                       ? NetworkImage(widget.avatarUrl!)
                       : null,
                   onBackgroundImageError: _isValidImageUrl(widget.avatarUrl)
-                      ? (_, __) {
-                          debugPrint('Error loading image: ${widget.avatarUrl}');
+                      ? (_, _) {
+                          debugPrint(
+                            'Error loading image: ${widget.avatarUrl}',
+                          );
                         }
                       : null,
                   child: !_isValidImageUrl(widget.avatarUrl)

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/doctor_details_view.dart';
 
 class DoctorCard extends StatelessWidget {
   final String? imageUrl; // ممكن يكون null

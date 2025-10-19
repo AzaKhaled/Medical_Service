@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_view.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/home_view_body.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/settting_view.dart';
 import 'package:medical_service_app/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -102,34 +105,25 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
-  // ✅ استخدم upsert للتأكد
-  Future<void> saveUserToTable(User user) async {
-    try {
-      final data = {
-        'auth_id': user.id,
-        'email': user.email,
-        'name': signUpNameController.text.trim(),
-        'created_at': DateTime.now().toIso8601String(), // 👈 أضف timestamp
-      };
+  //bottomNav
+  int _currentIndex = 0;
 
-      // debugPrint("📤 Sending user data to Supabase: $data");
+  int get currentIndex => _currentIndex;
 
-      // ✅ استخدم upsert بدل insert
-      final response = await supabase
-          .from('users')
-          .upsert(data, onConflict: 'auth_id') // 👈 لو موجود يعمل update
-          .select()
-          .single();
-
-      // debugPrint("✅ User saved successfully: $response");
-    } catch (e) {
-      // debugPrint("❌ Error saving user to table: $e");
-      // لا ترمي الخطأ، خلي التسجيل يكمل
-    }
+  set currentIndex(int index) {
+    _currentIndex = index;
+    emit(HomeBottomNavState());
   }
+
+  final List<Widget> screens = [
+    const HomeViewBody(),
+    const FavoriteView(),
+    const SettingsView(),
+  ];
 
   // ================= Get Current User Data =================
   Map<String, dynamic>? currentUserData;
+
   Future<void> getCurrentUserData() async {
     emit(HomeGetUserLoadingState());
 
@@ -269,80 +263,80 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   // ✅ Add Doctor to Favorites
-//   Future<void> addToFavorites(String doctorId) async {
-//     emit(HomeAddFavoriteLoadingState());
-//     try {
-//       final userId = supabase.auth.currentUser!.id;
+  //   Future<void> addToFavorites(String doctorId) async {
+  //     emit(HomeAddFavoriteLoadingState());
+  //     try {
+  //       final userId = supabase.auth.currentUser!.id;
 
-//       // 🛑 تأكد إن الدكتور مش مضاف من قبل
-//       final existing = await supabase
-//           .from('favorites')
-//           .select()
-//           .eq('user_id', userId)
-//           .eq('doctor_id', doctorId)
-//           .maybeSingle();
+  //       // 🛑 تأكد إن الدكتور مش مضاف من قبل
+  //       final existing = await supabase
+  //           .from('favorites')
+  //           .select()
+  //           .eq('user_id', userId)
+  //           .eq('doctor_id', doctorId)
+  //           .maybeSingle();
 
-//       if (existing != null) {
-//         emit(HomeAddFavoriteAlreadyExistsState());
-//         return;
-//       }
+  //       if (existing != null) {
+  //         emit(HomeAddFavoriteAlreadyExistsState());
+  //         return;
+  //       }
 
-//       // ✅ أضف الدكتور
-//       final response = await supabase.from('favorites').insert({
-//         'user_id': userId,
-//         'doctor_id': doctorId,
-//       }).select();
+  //       // ✅ أضف الدكتور
+  //       final response = await supabase.from('favorites').insert({
+  //         'user_id': userId,
+  //         'doctor_id': doctorId,
+  //       }).select();
 
-//       // ✅ مباشرة بعد الإضافة، استدعِ getFavorites لتحديث القائمة
-//       await getFavorites();
-//       debugPrint("✅ Added to favorites: $response");
-//       favorites = response;
-//       emit(HomeAddFavoriteSuccessState(response));
-//     } catch (e) {
-//       emit(HomeAddFavoriteErrorState(e.toString()));
-//     }
-//   }
+  //       // ✅ مباشرة بعد الإضافة، استدعِ getFavorites لتحديث القائمة
+  //       await getFavorites();
+  //       debugPrint("✅ Added to favorites: $response");
+  //       favorites = response;
+  //       emit(HomeAddFavoriteSuccessState(response));
+  //     } catch (e) {
+  //       emit(HomeAddFavoriteErrorState(e.toString()));
+  //     }
+  //   }
 
-//   // ✅ Remove Doctor from Favorites
-//   Future<void> removeFromFavorites(String doctorId) async {
-//     emit(HomeRemoveFavoriteLoadingState());
-//     try {
-//       final userId = supabase.auth.currentUser!.id;
-//       await supabase
-//           .from('favorites')
-//           .delete()
-//           .eq('user_id', userId)
-//           .eq('doctor_id', doctorId);
+  //   // ✅ Remove Doctor from Favorites
+  //   Future<void> removeFromFavorites(String doctorId) async {
+  //     emit(HomeRemoveFavoriteLoadingState());
+  //     try {
+  //       final userId = supabase.auth.currentUser!.id;
+  //       await supabase
+  //           .from('favorites')
+  //           .delete()
+  //           .eq('user_id', userId)
+  //           .eq('doctor_id', doctorId);
 
-//       // debugPrint("💔 Removed from favorites: $doctorId");
+  //       // debugPrint("💔 Removed from favorites: $doctorId");
 
-//       // بعد الحذف أرجع هات الفيفورتس من جديد
-//       await getFavorites();
-//     } catch (e) {
-//       // debugPrint("❌ Error removing from favorites: $e");
-//       emit(HomeRemoveFavoriteErrorState(e.toString()));
-//     }
-//   }
+  //       // بعد الحذف أرجع هات الفيفورتس من جديد
+  //       await getFavorites();
+  //     } catch (e) {
+  //       // debugPrint("❌ Error removing from favorites: $e");
+  //       emit(HomeRemoveFavoriteErrorState(e.toString()));
+  //     }
+  //   }
 
-//   // ✅ Get All Favorites for Logged User
-//   Future<void> getFavorites() async {
-//   emit(HomeGetFavoritesLoadingState());
-//   try {
-//     final userId = supabase.auth.currentUser!.id;
+  //   // ✅ Get All Favorites for Logged User
+  //   Future<void> getFavorites() async {
+  //   emit(HomeGetFavoritesLoadingState());
+  //   try {
+  //     final userId = supabase.auth.currentUser!.id;
 
-//     final response = await supabase
-//         .from('favorites')
-//         .select('doctor_id, doctors(*)')
-//         .eq('user_id', userId);
+  //     final response = await supabase
+  //         .from('favorites')
+  //         .select('doctor_id, doctors(*)')
+  //         .eq('user_id', userId);
 
-//     debugPrint("📥 Favorites: $response");
+  //     debugPrint("📥 Favorites: $response");
 
-//     emit(HomeGetFavoritesSuccessState(response));
-//   } catch (e) {
-//     debugPrint("❌ Error getting favorites: $e");
-//     emit(HomeGetFavoritesErrorState(e.toString()));
-//   }
-// }
+  //     emit(HomeGetFavoritesSuccessState(response));
+  //   } catch (e) {
+  //     debugPrint("❌ Error getting favorites: $e");
+  //     emit(HomeGetFavoritesErrorState(e.toString()));
+  //   }
+  // }
 
   // ✅ Add Review (تعليق جديد)
   Future<void> addReview({
@@ -490,7 +484,6 @@ class HomeCubit extends Cubit<HomeStates> {
 
     try {
       final user = supabase.auth.currentUser!;
-      if (user == null) throw Exception("User not logged in!");
       final userId = user.id;
       // debugPrint("🔑 Booking for userId: $userId");
 
@@ -526,18 +519,6 @@ class HomeCubit extends Cubit<HomeStates> {
 
       // إضافة الموعد
       try {
-        final response = await supabase
-            .from('appointments')
-            .insert({
-              'doctor_id': doctorId,
-              'user_id': userId,
-              'appointment_date': dateStr,
-              'appointment_time': appointmentTime,
-              'status': 'pending',
-            })
-            .select()
-            .single();
-
         // debugPrint("✅ تم حجز الموعد بنجاح: $response");
       } catch (e) {
         // لو الـ DB رمى duplicate key (23505)

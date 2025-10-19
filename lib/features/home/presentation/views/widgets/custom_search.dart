@@ -3,7 +3,7 @@ import 'package:medical_service_app/core/utils/constants/customtextfiled.dart';
 
 class CustomSearch extends StatelessWidget {
   final TextEditingController controller;
-  final Function(String)? onChanged;
+  final void Function(String)? onChanged;
   final String hintText; // ← هنا ضفت المتغير
 
   const CustomSearch({
@@ -19,7 +19,7 @@ class CustomSearch extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       preffixIcon: const Icon(Icons.search),
-      hintText: hintText, 
+      hintText: hintText,
       textInputType: TextInputType.text,
     );
   }

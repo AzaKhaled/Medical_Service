@@ -7,7 +7,6 @@ import 'package:medical_service_app/features/login/presentation/screen/login_scr
 import 'package:medical_service_app/features/login/presentation/widget/password_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 class ResetPasswordView extends StatefulWidget {
   const ResetPasswordView({super.key});
 
@@ -21,7 +20,8 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
   late String email;
 
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool _isResetMode = false;
 
@@ -98,6 +98,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                           email,
                           redirectTo: 'myapp://reset-password?type=recovery',
                         );
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Password reset email sent'),
@@ -130,7 +131,6 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                   },
                 ),
               ]
-
               // ===== Reset Password Mode =====
               else ...[
                 PasswordField(
@@ -166,19 +166,22 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                         await Supabase.instance.client.auth.updateUser(
                           UserAttributes(password: passwordController.text),
                         );
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Password updated successfully'),
                             backgroundColor: Colors.green,
                           ),
                         );
+                        if (!context.mounted) return;
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
+                          MaterialPageRoute<Object>(
                             builder: (_) => const LoginScreen(),
                           ),
                         );
                       } on AuthException catch (e) {
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(e.message),

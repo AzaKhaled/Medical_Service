@@ -19,7 +19,7 @@ class NotificationsView extends StatelessWidget {
           onTap: () {
             Navigator.pop(context);
           },
-          child: Icon(Icons.arrow_back_ios, size: 18),
+          child: const Icon(Icons.arrow_back_ios, size: 18),
         ),
       ),
 
@@ -46,7 +46,7 @@ class NotificationsView extends StatelessWidget {
                 final notif = notifications[index];
 
                 // تحويل التاريخ إلى DateTime
-                DateTime createdAt =
+                final DateTime createdAt =
                     DateTime.tryParse(notif['created_at'] ?? '') ??
                     DateTime.now();
 

@@ -29,30 +29,28 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cupertino_icons: ^1.0.8
-  dartz: ^0.10.1
-  email_validator: ^3.0.0
-  firebase_core: ^4.1.1
-  firebase_messaging: ^16.0.2
+  firebase_core: ^4.2.0
+  firebase_messaging: ^16.0.3
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_launcher_icons: ^0.14.4
-  flutter_local_notifications: ^19.4.2
+  flutter_local_notifications: ^19.5.0
   flutter_rating_bar: ^4.0.1
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.2.1
-  font_awesome_flutter: ^10.10.0
-  get_it: ^8.2.0
+  font_awesome_flutter: ^10.11.0
   image_picker: ^1.2.0
   modal_progress_hud_nsn: ^0.5.1
   shared_preferences_dtx: ^1.1.5
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.1
-  supabase_flutter: ^2.10.1
+  supabase_flutter: ^2.10.3
   timeago: ^3.7.1
 
+  bloc: ^9.1.0
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
 

@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_state.dart';
-import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
-import 'package:medical_service_app/core/utils/cubit/home_state.dart'
-    hide
-        HomeGetFavoritesLoadingState,
-        HomeGetFavoritesSuccessState,
-        HomeGetFavoritesErrorState;
 
 class FavoriteView extends StatefulWidget {
   const FavoriteView({super.key});
@@ -20,9 +14,7 @@ class _FavoriteViewState extends State<FavoriteView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FavoriteCubit>().getFavorites();
-    });
+    favoriteCubit.getFavorites();
   }
 
   @override
@@ -62,18 +54,18 @@ class _FavoriteViewState extends State<FavoriteView> {
               ),
               itemBuilder: (context, index) {
                 final favoriteItem = favorites[index];
-                print('🧠 building item $index: $favoriteItem');
+                debugPrint('🧠 building item $index: $favoriteItem');
                 final doctor = favoriteItem['doctors']; // ✅ من Supabase
 
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
                         blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        offset: Offset(0, 4),
                       ),
                     ],
                   ),
@@ -108,7 +100,7 @@ class _FavoriteViewState extends State<FavoriteView> {
                             right: 8,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.white.withValues(alpha: 0.8),
                                 shape: BoxShape.circle,
                               ),
                               child: IconButton(

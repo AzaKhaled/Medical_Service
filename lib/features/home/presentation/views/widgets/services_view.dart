@@ -26,104 +26,120 @@ final Map<String, dynamic> serviceIcons = {
   "Emergency99": FontAwesomeIcons.truckMedical,
 };
 
-class ServicesView extends StatelessWidget {
+class ServicesView extends StatefulWidget {
   const ServicesView({super.key});
 
   @override
+  State<ServicesView> createState() => _ServicesViewState();
+}
+
+class _ServicesViewState extends State<ServicesView> {
+  @override
+  void initState() {
+    super.initState();
+    homeCubit.getCategories();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final homeCubit = context.watch<HomeCubit>();
-    final categories = homeCubit.categories;
-    final controller = PageController();
-
-    final pages = categories.isNotEmpty
-        ? List<Widget>.generate((categories.length / 4).ceil(), (pageIndex) {
-            final start = pageIndex * 3;
-            final end = (start + 3).clamp(0, categories.length);
-            final visibleItems = categories.sublist(start, end);
-
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: visibleItems.map<Widget>((cat) {
-                final catName = cat['name'] ?? "Unknown";
-                final icon = serviceIcons[catName] ?? Icons.local_hospital;
-
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      homeCubit.getDoctorsByCategory(cat['id'].toString());
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(icon, size: 30, color: Colors.white),
-                          const SizedBox(height: 8),
-                          Text(
-                            catName,
-                            style: const TextStyle(color: Colors.white),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
+    return BlocBuilder<HomeCubit, HomeStates>(
+      buildWhen: (previous, current) =>
+          current is HomeGetCategoriesSuccessState ||
+          current is HomeGetCategoriesErrorState ||
+          current is HomeGetCategoriesLoadingState,
+      builder: (context, state) {
+        final categories = homeCubit.categories;
+        final controller = PageController();
+        final pages = categories.isNotEmpty
+            ? List<Widget>.generate((categories.length / 4).ceil(), (
+                pageIndex,
+              ) {
+                final start = pageIndex * 3;
+                final end = (start + 3).clamp(0, categories.length);
+                final visibleItems = categories.sublist(start, end);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: visibleItems.map<Widget>((cat) {
+                    final catName = cat['name'] ?? "Unknown";
+                    final icon = serviceIcons[catName] ?? Icons.local_hospital;
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          homeCubit.getDoctorsByCategory(cat['id'].toString());
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ],
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(icon, size: 30, color: Colors.white),
+                              const SizedBox(height: 8),
+                              Text(
+                                catName,
+                                style: const TextStyle(color: Colors.white),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
+                    );
+                  }).toList(),
+                );
+              })
+            : <Widget>[];
+        return Padding(
+          padding: const EdgeInsets.only(left: 14.0, right: 14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Services",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 5.h),
+              SizedBox(
+                height: 100,
+                child: categories.isNotEmpty
+                    ? PageView(controller: controller, children: pages)
+                    : homeCubit.state is HomeGetCategoriesLoadingState
+                    ? const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ServiceItemShimmer(),
+                          ServiceItemShimmer(),
+                          ServiceItemShimmer(),
+                          ServiceItemShimmer(),
+                        ],
+                      )
+                    : homeCubit.state is HomeGetCategoriesErrorState
+                    ? const Center(child: Text("Error loading categories"))
+                    : const Center(child: Text("No categories available")),
+              ),
+              if (pages.isNotEmpty) SizedBox(height: 8.h),
+              if (pages.isNotEmpty)
+                Center(
+                  child: SmoothPageIndicator(
+                    controller: controller,
+                    count: pages.length,
+                    effect: const ExpandingDotsEffect(
+                      activeDotColor: AppColors.primaryColor,
+                      dotHeight: 8,
+                      dotWidth: 8,
                     ),
                   ),
-                );
-              }).toList(),
-            );
-          })
-        : <Widget>[];
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 14.0, right: 14.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Services",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 5.h),
-          SizedBox(
-            height: 100,
-            child: categories.isNotEmpty
-                ? PageView(controller: controller, children: pages)
-                : homeCubit.state is HomeGetCategoriesLoadingState
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: const [
-                      ServiceItemShimmer(),
-                      ServiceItemShimmer(),
-                      ServiceItemShimmer(),
-                      ServiceItemShimmer(),
-                    ],
-                  )
-                : homeCubit.state is HomeGetCategoriesErrorState
-                ? const Center(child: Text("Error loading categories"))
-                : const Center(child: Text("No categories available")),
-          ),
-          if (pages.isNotEmpty) SizedBox(height: 8.h),
-          if (pages.isNotEmpty)
-            Center(
-              child: SmoothPageIndicator(
-                controller: controller,
-                count: pages.length,
-                effect: const ExpandingDotsEffect(
-                  activeDotColor: AppColors.primaryColor,
-                  dotHeight: 8,
-                  dotWidth: 8,
                 ),
-              ),
-            ),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -47,7 +47,7 @@ class ReviewItem extends StatelessWidget {
                       ? AssetImage(userImage) as ImageProvider
                       : null),
             onBackgroundImageError: isNetwork
-                ? (_, __) {
+                ? (_, _) {
                     debugPrint('❌ Failed to load image: $userImage');
                   }
                 : null,

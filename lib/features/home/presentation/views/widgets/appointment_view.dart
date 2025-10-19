@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppointmentView extends StatefulWidget {
   final String doctorId;
@@ -35,11 +34,11 @@ class _AppointmentViewState extends State<AppointmentView> {
   List<String> _generateTimeSlots(String workingHours) {
     final parts = workingHours.split(' - ');
     if (parts.length != 2) return [];
-    TimeOfDay? start = _parseTime(parts[0]);
-    TimeOfDay? end = _parseTime(parts[1]);
+    final TimeOfDay? start = _parseTime(parts[0]);
+    final TimeOfDay? end = _parseTime(parts[1]);
     if (start == null || end == null) return [];
 
-    List<String> slots = [];
+    final List<String> slots = [];
     TimeOfDay current = start;
     while (_isBeforeOrEqual(current, end)) {
       slots.add(_formatTime(current));
@@ -53,7 +52,7 @@ class _AppointmentViewState extends State<AppointmentView> {
       final parts = timeString.trim().split(' ');
       final timeParts = parts[0].split(':');
       int hour = int.parse(timeParts[0]);
-      int minute = timeParts.length > 1 ? int.parse(timeParts[1]) : 0;
+      final int minute = timeParts.length > 1 ? int.parse(timeParts[1]) : 0;
       final isPM = parts[1].toUpperCase() == 'PM';
       if (isPM && hour != 12) hour += 12;
       if (!isPM && hour == 12) hour = 0;
@@ -281,7 +280,8 @@ class _AppointmentViewState extends State<AppointmentView> {
                           // احنا محتاجين التاريخ الكامل (اليوم القادم اللي مطابق لليوم المحدد)
                           final now = DateTime.now();
                           // احسب الفرق بين اليوم الحالي واليوم اللي المستخدم اختاره
-                          int daysToAdd = (selectedDay! - now.weekday) % 7;
+                          final int daysToAdd =
+                              (selectedDay! - now.weekday) % 7;
                           final appointmentDate = now.add(
                             Duration(days: daysToAdd),
                           );
@@ -292,7 +292,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                             appointmentTime: selectedTime!,
                           );
 
-                          if (mounted) {
+                          if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text("✅ تم حجز الموعد بنجاح"),
@@ -303,7 +303,6 @@ class _AppointmentViewState extends State<AppointmentView> {
                               selectedDay = null;
                               selectedTime = null;
                             });
-                          }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(

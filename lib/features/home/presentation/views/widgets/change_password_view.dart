@@ -32,6 +32,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         Navigator.pop(context);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));

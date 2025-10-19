@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medical_service_app/core/utils/constants/customtextfiled.dart';
 
-
-
 class PasswordField extends StatefulWidget {
   const PasswordField({
     super.key,

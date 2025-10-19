@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/utils/constants/app_text_styles.dart';
 import 'package:medical_service_app/core/utils/constants/custombutton.dart';
@@ -17,8 +16,6 @@ class SignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeCubit = context.read<HomeCubit>();
-
     return BlocConsumer<HomeCubit, HomeStates>(
       listener: (context, state) {
         if (state is HomeSignupSuccessState) {
@@ -29,10 +26,11 @@ class SignupScreen extends StatelessWidget {
             ),
           );
           Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()), 
-     
-    );
+            context,
+            MaterialPageRoute<Object>(
+              builder: (context) => const LoginScreen(),
+            ),
+          );
         }
         if (state is HomeSignupErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -42,107 +40,109 @@ class SignupScreen extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Form(
-                key: homeCubit.signUpFormKey,
-                child: Column(
-                  children: [
-                    SizedBox(height: 15.h),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF3E69FE).withOpacity(0.18),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Form(
+                  key: homeCubit.signUpFormKey,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 15.h),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(
+                                0xFF3E69FE,
+                              ).withValues(alpha: 0.18),
+                            ),
                           ),
-                        ),
-                        const Icon(
-                          Icons.priority_high,
-                          size: 36,
-                          color: Color(0xFF3E69FE),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
-                    const Text(
-                      'Create Account',
-                      style: TextStyles.montserrat700_36,
-                    ),
-                    SizedBox(height: 24.h),
-
-                    // Username
-                    CustomTextFormField(
-                      controller: homeCubit.signUpNameController,
-                      preffixIcon: const Icon(Icons.person),
-                      hintText: 'Username',
-                      textInputType: TextInputType.name,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter username';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Email
-                    CustomTextFormField(
-                      controller: homeCubit.signUpEmailController,
-                      preffixIcon: const Icon(Icons.email),
-                      hintText: 'Email',
-                      textInputType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Invalid email';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Password
-                    PasswordField(
-                      controller: homeCubit.signUpPasswordController,
-                      hintText: 'Password',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter password';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    const PublicOffireSection(),
-                    SizedBox(height: 30.h),
-
-                    CustomButton(
-                      onPressed: () {
-                        if (homeCubit.signUpFormKey.currentState!.validate()) {
-                          homeCubit.signup();
-                        }
-                      },
-                      text: state is HomeSignupLoadingState
-                          ? "Loading..."
-                          : "Register",
-                    ),
-                    SizedBox(height: 16.h),
-
-                    HaveAnAccountSection(
-                      leadingText: 'Already have an account?',
-                      actionText: ' Login',
-                      onTap: () {
-                        Navigator.pop(context); // أو يوديك لصفحة اللوجين
-                      },
-                    ),
-                  ],
+                          const Icon(
+                            Icons.priority_high,
+                            size: 36,
+                            color: Color(0xFF3E69FE),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16.h),
+                      const Text(
+                        'Create Account',
+                        style: TextStyles.montserrat700_36,
+                      ),
+                      SizedBox(height: 24.h),
+            
+                      // Username
+                      CustomTextFormField(
+                        controller: homeCubit.signUpNameController,
+                        preffixIcon: const Icon(Icons.person),
+                        hintText: 'Username',
+                        textInputType: TextInputType.name,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter username';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+            
+                      // Email
+                      CustomTextFormField(
+                        controller: homeCubit.signUpEmailController,
+                        preffixIcon: const Icon(Icons.email),
+                        hintText: 'Email',
+                        textInputType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter email';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+            
+                      // Password
+                      PasswordField(
+                        controller: homeCubit.signUpPasswordController,
+                        hintText: 'Password',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter password';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+            
+                      const PublicOffireSection(),
+                      SizedBox(height: 30.h),
+            
+                      CustomButton(
+                        onPressed: () {
+                          if (homeCubit.signUpFormKey.currentState!.validate()) {
+                            homeCubit.signup();
+                          }
+                        },
+                        text: state is HomeSignupLoadingState
+                            ? "Loading..."
+                            : "Register",
+                      ),
+                      SizedBox(height: 16.h),
+            
+                      HaveAnAccountSection(
+                        leadingText: 'Already have an account?',
+                        actionText: ' Login',
+                        onTap: () {
+                          Navigator.pop(context); // أو يوديك لصفحة اللوجين
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

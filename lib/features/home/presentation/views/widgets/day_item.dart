@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
+
 class DayItem extends StatelessWidget {
   final String day;
   final String date;

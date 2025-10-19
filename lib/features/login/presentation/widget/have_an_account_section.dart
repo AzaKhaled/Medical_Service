@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 
-
-
 class HaveAnAccountSection extends StatelessWidget {
   final String leadingText;
   final String actionText;
@@ -19,9 +17,12 @@ class HaveAnAccountSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       children: [
-        Text(leadingText, style: const TextStyle(
-          color: Colors.black,
-        )),
+        Text(
+          leadingText,
+          style: const TextStyle(
+            color: Colors.black,
+          ),
+        ),
         GestureDetector(
           onTap: onTap,
           child: Text(

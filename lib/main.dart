@@ -9,6 +9,7 @@ import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 // 🔔 متغير الإشعارات المحلية
@@ -40,9 +41,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     'body': body,
   });
 
-  print('📩 إشعار وصل في الخلفية: $title');
+  debugPrint('📩 إشعار وصل في الخلفية: $title');
 }
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +51,7 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   // ✅ 2) إعداد FCM
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   // 🔐 طلب الإذن من المستخدم (مهم لـ iOS)
   await messaging.requestPermission();
@@ -61,42 +61,39 @@ Future<void> main() async {
 
   // 🧠 استقبال رسائل أثناء فتح التطبيق (Foreground)
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-  print('📨 إشعار Foreground: ${message.notification?.title}');
-  
-  final user = Supabase.instance.client.auth.currentUser;
-  if (user != null) {
-  await HomeCubit().updateFcmToken();
-}
-  if (user == null) return;
+    debugPrint('📨 إشعار Foreground: ${message.notification?.title}');
 
-  // 🆔 هات الـ id من جدول users
- final userResponse = await Supabase.instance.client
-    .from('users')
-    .select('id')
-    .eq('auth_id', user.id)
-    .maybeSingle();
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      await HomeCubit().updateFcmToken();
+    }
+    if (user == null) return;
 
-if (userResponse == null) return;
+    // 🆔 هات الـ id من جدول users
+    final userResponse = await Supabase.instance.client
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
 
-final userIdFromTable = userResponse['id'];
-final title = message.notification?.title ?? 'تنبيه جديد';
-final body = message.notification?.body ?? '';
+    if (userResponse == null) return;
 
-await Supabase.instance.client.from('notifications').insert({
-  'user_id': userIdFromTable,
-  'title': title,
-  'body': body,
-});
+    final userIdFromTable = userResponse['id'];
+    final title = message.notification?.title ?? 'تنبيه جديد';
+    final body = message.notification?.body ?? '';
 
-print('📩 إشعار Foreground: $title');
+    await Supabase.instance.client.from('notifications').insert({
+      'user_id': userIdFromTable,
+      'title': title,
+      'body': body,
+    });
 
-      
-});
-
+    debugPrint('📩 إشعار Foreground: $title');
+  });
 
   // ✅ 3) طباعة الـ Token علشان تبعتي إشعارات للموبايل ده
-  String? token = await messaging.getToken();
- print('🔑 FCM Token: $token');
+  final String? token = await messaging.getToken();
+  debugPrint('🔑 FCM Token: $token');
 
   // ✅ 4) Supabase initialization
   await Supabase.initialize(
@@ -116,26 +113,29 @@ class MedicalService extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-  providers: [
-    BlocProvider(create: (context) => HomeCubit()..initNotifications()),
-    BlocProvider(create: (context) => FavoriteCubit()..getFavorites()), // 🟢 أضفها هنا
-  ],
-  child: BlocBuilder<HomeCubit, HomeStates>(
-    builder: (context, state) {
-      return ScreenUtilInit(
-        designSize: const Size(360, 690),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            routes: Routes.routes,
-            initialRoute: Routes.loginRoute,
+      providers: [
+        BlocProvider(create: (context) => HomeCubit()..initNotifications()),
+        BlocProvider(
+          create: (context) => FavoriteCubit()..getFavorites(),
+        ), // 🟢 أضفها هنا
+      ],
+      child: BlocBuilder<HomeCubit, HomeStates>(
+        builder: (context, state) {
+          return ScreenUtilInit(
+            designSize: const Size(360, 690),
+            minTextAdapt: true,
+            splitScreenMode: true,
+            builder: (context, child) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                routes: Routes.routes,
+                initialRoute: Routes.loginRoute,
+                navigatorKey: navigatorKey,
+              );
+            },
           );
         },
-      );
-    },
-  ),
-);
-}
+      ),
+    );
+  }
 }

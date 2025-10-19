@@ -26,8 +26,6 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
 
   @override
   Widget build(BuildContext context) {
-    final homeCubit = context.read<HomeCubit>();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
@@ -76,7 +74,7 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
                           border: Border.all(color: Colors.white, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 5,
                               offset: const Offset(0, 3),
                             ),
@@ -114,7 +112,9 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
                 } else if (state is HomeUploadProfileImageErrorState) {
                   ScaffoldMessenger.of(
                     context,
-                  ).showSnackBar(SnackBar(content: Text('❌error try again')));
+                  ).showSnackBar(
+                    const SnackBar(content: Text('❌error try again')),
+                  );
                 }
               },
               builder: (context, state) {

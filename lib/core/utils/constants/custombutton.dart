@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/constants/app_text_styles.dart';
 
-
 class CustomButton extends StatelessWidget {
   const CustomButton({super.key, required this.onPressed, required this.text});
   final VoidCallback onPressed;
