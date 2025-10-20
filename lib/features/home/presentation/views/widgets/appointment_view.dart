@@ -293,16 +293,16 @@ class _AppointmentViewState extends State<AppointmentView> {
                           );
 
                           if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("✅ تم حجز الموعد بنجاح"),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                            setState(() {
-                              selectedDay = null;
-                              selectedTime = null;
-                            });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("✅ تم حجز الموعد بنجاح"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          setState(() {
+                            selectedDay = null;
+                            selectedTime = null;
+                          });
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(

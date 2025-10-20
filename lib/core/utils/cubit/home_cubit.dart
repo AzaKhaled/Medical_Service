@@ -485,7 +485,7 @@ class HomeCubit extends Cubit<HomeStates> {
     try {
       final user = supabase.auth.currentUser!;
       final userId = user.id;
-      // debugPrint("🔑 Booking for userId: $userId");
+      debugPrint("🔑 Booking for userId: $userId");
 
       final dateStr = appointmentDate.toIso8601String().split('T')[0];
 
@@ -499,7 +499,7 @@ class HomeCubit extends Cubit<HomeStates> {
           .maybeSingle();
 
       if (existing != null) {
-        // debugPrint("❌ هذا الموعد محجوز بالفعل");
+        debugPrint("❌ هذا الموعد محجوز بالفعل");
         throw Exception("هذا الموعد محجوز بالفعل");
       }
 
@@ -513,13 +513,24 @@ class HomeCubit extends Cubit<HomeStates> {
           .maybeSingle();
 
       if (userExisting != null) {
-        // debugPrint("❌ أنت حجزت هذا الموعد بالفعل");
+        debugPrint("❌ أنت حجزت هذا الموعد بالفعل");
         throw Exception("You have already booked this appointment");
       }
 
       // إضافة الموعد
       try {
-        // debugPrint("✅ تم حجز الموعد بنجاح: $response");
+        final response = await supabase
+            .from('appointments')
+            .insert({
+              'doctor_id': doctorId,
+              'user_id': userId,
+              'appointment_date': dateStr,
+              'appointment_time': appointmentTime,
+              'status': 'pending',
+            })
+            .select()
+            .single();
+        debugPrint("✅ تم حجز الموعد بنجاح: $response");
       } catch (e) {
         // لو الـ DB رمى duplicate key (23505)
         if (e is PostgrestException && e.code == '23505') {
@@ -531,7 +542,7 @@ class HomeCubit extends Cubit<HomeStates> {
         }
       }
     } catch (e) {
-      // debugPrint("❌ خطأ في الحجز: $e");
+      debugPrint("❌ خطأ في الحجز: $e");
       rethrow;
     }
   }
@@ -586,7 +597,7 @@ class HomeCubit extends Cubit<HomeStates> {
     await fetchOldNotifications();
 
     // ✅ الاشتراك في التغييرات الجديدة
-    _subscribeToNotifications();
+    subscribeToNotifications();
   }
 
   Future<void> fetchOldNotifications() async {
@@ -624,7 +635,7 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(HomeNotificationsLoadedState(notifications));
   }
 
-  void _subscribeToNotifications() async {
+  void subscribeToNotifications() async {
     final authUser = Supabase.instance.client.auth.currentUser;
     if (authUser == null) return;
 
@@ -706,5 +717,10 @@ class HomeCubit extends Cubit<HomeStates> {
   void markNotificationAsRead(int index) {
     notifications[index]['isRead'] = true;
     emit(HomeNotificationsUpdatedState()); // اعملي State لتحديث الـ UI
+  }
+
+  Future<void> signOut(BuildContext context) async {
+    await Supabase.instance.client.auth.signOut();
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
   }
 }

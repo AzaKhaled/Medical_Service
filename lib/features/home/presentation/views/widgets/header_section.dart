@@ -28,15 +28,7 @@ class _HeaderSectionState extends State<HeaderSection> {
         (url.startsWith('http://') || url.startsWith('https://'));
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // final homeCubit = context.read<HomeCubit>();
 
-  //   // ✅ استدعاء بيانات المستخدم عشان الاسم والصورة تظهر في الهيدر
-  //   homeCubit.getCurrentUserData();
-
-  // }
   @override
   void initState() {
     super.initState();

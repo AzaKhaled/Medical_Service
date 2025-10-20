@@ -32,6 +32,10 @@ class _FavoriteViewState extends State<FavoriteView> {
         foregroundColor: Colors.black,
       ),
       body: BlocBuilder<FavoriteCubit, FavotieStates>(
+        buildWhen: (previous, current) =>
+            current is HomeGetFavoritesLoadingState ||
+            current is HomeGetFavoritesSuccessState ||
+            current is HomeGetFavoritesErrorState,
         builder: (context, state) {
           debugPrint('🟢 UI received favorites: ');
 

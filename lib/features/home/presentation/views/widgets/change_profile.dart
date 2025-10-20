@@ -60,11 +60,16 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
                       backgroundColor: Colors.grey.shade300,
                       backgroundImage: _selectedImage != null
                           ? FileImage(_selectedImage!)
-                          : const AssetImage(
-                                  'assets/images/default_profile.png',
-                                )
-                                as ImageProvider,
+                          : null, // لو مفيش صورة، بنرجع لـ child
+                      child: _selectedImage == null
+                          ? const Icon(
+                              Icons.person,
+                              size: 80,
+                              color: Colors.grey,
+                            )
+                          : null,
                     ),
+
                     GestureDetector(
                       onTap: _pickImage,
                       child: Container(

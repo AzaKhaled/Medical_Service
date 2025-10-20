@@ -16,7 +16,6 @@ class DoctorsListBuilder extends StatefulWidget {
 class _DoctorsListBuilderState extends State<DoctorsListBuilder> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     homeCubit.getDoctors();
   }
