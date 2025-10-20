@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:medical_service_app/core/models/user_model.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/home_view_body.dart';
@@ -21,8 +22,6 @@ class HomeCubit extends Cubit<HomeStates> {
   List<dynamic> categories = [];
 
   //form
-  final signUpFormKey = GlobalKey<FormState>();
-  final loginFormKey = GlobalKey<FormState>();
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
   final signUpNameController = TextEditingController();
@@ -122,31 +121,44 @@ class HomeCubit extends Cubit<HomeStates> {
   ];
 
   // ================= Get Current User Data =================
-  Map<String, dynamic>? currentUserData;
+  UserModel? currentUserData;
 
   Future<void> getCurrentUserData() async {
     emit(HomeGetUserLoadingState());
 
     try {
-      final user = supabase.auth.currentUser!;
+      final user = supabase.auth.currentUser;
+
+      // 🔹 تحقق أولاً أن المستخدم مسجّل دخول
+      if (user == null) {
+        emit(HomeGetUserErrorState("No user logged in."));
+        return;
+      }
+
+      // 🔹 جلب بيانات المستخدم من جدول users
       final response = await supabase
           .from('users')
           .select()
           .eq('auth_id', user.id)
-          .maybeSingle(); // مجرد صف واحد
+          .maybeSingle(); // يرجع null إذا مفيش صف
 
-      if (response != null) {
-        currentUserData = response; // ✅ هنا نخزن البيانات
-        // debugPrint("📥 Current user data: $response");
-        emit(HomeGetUserSuccessState(response));
-      } else {
-        emit(HomeGetUserErrorState("User data not found"));
+      if (response == null) {
+        emit(HomeGetUserErrorState("User data not found in database."));
+        return;
       }
-    } catch (e) {
-      // debugPrint("❌ Error fetching user data: $e");
+
+      // 🔹 تحويل البيانات إلى موديل
+      currentUserData = UserModel.fromJson(response);
+
+      debugPrint("✅ Current user data loaded: ${currentUserData!.name}");
+      emit(HomeGetUserSuccessState());
+    } catch (e, stackTrace) {
+      debugPrint("❌ Error fetching user data: $e");
+      debugPrintStack(stackTrace: stackTrace);
       emit(HomeGetUserErrorState(e.toString()));
     }
   }
+
 
   // ✅ Get Categories
   Future<void> getCategories() async {
@@ -720,7 +732,10 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   Future<void> signOut(BuildContext context) async {
-    await Supabase.instance.client.auth.signOut();
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    await Supabase.instance.client.auth.signOut().then((value) {
+      if (!context.mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      currentIndex = 0;
+    });
   }
 }

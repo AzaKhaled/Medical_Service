@@ -14,8 +14,8 @@ class Routes {
   static Map<String, WidgetBuilder> get routes => {
     homeRoute: (context) => const HomeView(),
     favoriteRoute: (context) => const FavoriteView(),
-    loginRoute: (context) => const LoginScreen(),
-    signupRoute: (context) => const SignupScreen(),
+    loginRoute: (context) => LoginScreen(),
+    signupRoute: (context) => SignupScreen(),
     notificationsRoute: (context) => const NotificationsView(),
   };
 }

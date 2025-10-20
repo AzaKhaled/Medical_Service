@@ -4,15 +4,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/utils/constants/app_text_styles.dart';
 import 'package:medical_service_app/core/utils/constants/custombutton.dart';
 import 'package:medical_service_app/core/utils/constants/customtextfiled.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
-import 'package:medical_service_app/features/login/presentation/screen/login_screen.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/login/presentation/widget/have_an_account_section.dart';
 import 'package:medical_service_app/features/login/presentation/widget/password_field.dart';
 import 'package:medical_service_app/features/login/presentation/widget/public_offer_section.dart';
 
 class SignupScreen extends StatelessWidget {
-  const SignupScreen({super.key});
+
+  final GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
+
+  SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +29,7 @@ class SignupScreen extends StatelessWidget {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute<Object>(
-              builder: (context) => const LoginScreen(),
-            ),
-          );
+          context.pushReplacement<Object>(Routes.homeRoute);
         }
         if (state is HomeSignupErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -45,7 +44,7 @@ class SignupScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Form(
-                  key: homeCubit.signUpFormKey,
+                  key: signUpFormKey,
                   child: Column(
                     children: [
                       SizedBox(height: 15.h),
@@ -124,7 +123,7 @@ class SignupScreen extends StatelessWidget {
             
                       CustomButton(
                         onPressed: () {
-                          if (homeCubit.signUpFormKey.currentState!.validate()) {
+                          if (signUpFormKey.currentState!.validate()) {
                             homeCubit.signup();
                           }
                         },
@@ -138,7 +137,7 @@ class SignupScreen extends StatelessWidget {
                         leadingText: 'Already have an account?',
                         actionText: ' Login',
                         onTap: () {
-                          Navigator.pop(context); // أو يوديك لصفحة اللوجين
+                          context.pop; // أو يوديك لصفحة اللوجين
                         },
                       ),
                     ],

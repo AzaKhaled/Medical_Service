@@ -30,7 +30,7 @@ class _ReviewViewState extends State<ReviewView> {
   Widget build(BuildContext context) {
     final homeCubit = HomeCubit.get(context);
     final currentUser = homeCubit.currentUserData;
-    final userImageUrl = currentUser?['image_url'];
+    final userImageUrl = currentUser?.imageUrl;
 
     return Scaffold(
       appBar: AppBar(

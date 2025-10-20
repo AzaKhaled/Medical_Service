@@ -42,11 +42,7 @@ class HomeBottomNavState extends HomeStates {}
 // States related to user data
 class HomeGetUserLoadingState extends HomeStates {}
 
-class HomeGetUserSuccessState extends HomeStates {
-  final Map<String, dynamic> userData;
-
-  HomeGetUserSuccessState(this.userData);
-}
+class HomeGetUserSuccessState extends HomeStates {}
 
 class HomeGetUserErrorState extends HomeStates {
   final String error;

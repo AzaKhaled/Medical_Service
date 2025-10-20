@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
-import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/doctors_list_builder.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/header_section.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/services_view.dart';
@@ -14,7 +12,6 @@ class HomeViewBody extends StatefulWidget {
 }
 
 class _HomeViewBodyState extends State<HomeViewBody> {
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -24,25 +21,13 @@ class _HomeViewBodyState extends State<HomeViewBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
-        BlocBuilder<HomeCubit, HomeStates>(
-          builder: (context, state) {
-            final user = homeCubit.currentUserData;
-            return HeaderSection(
-              name: user?['name'],
-              avatarUrl: user?['image_url'],
-              searchController: _searchController,
-              onSearchChanged: (value) {
-                homeCubit.searchDoctors(value);
-              },
-            );
-          },
-        ),
-        const SizedBox(height: 10),
-        const ServicesView(),
-        const SizedBox(height: 10),
-        const DoctorsListBuilder(),
+        HeaderSection(),
+        SizedBox(height: 10),
+        ServicesView(),
+        SizedBox(height: 10),
+        DoctorsListBuilder(),
       ],
     );
   }

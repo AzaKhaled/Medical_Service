@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 
 class AppointmentView extends StatefulWidget {
   final String doctorId;
@@ -106,7 +107,7 @@ class _AppointmentViewState extends State<AppointmentView> {
         title: const Text('Book Appointment'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop,
         ),
       ),
       body: Column(

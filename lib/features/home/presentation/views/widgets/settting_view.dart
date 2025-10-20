@@ -46,15 +46,15 @@ class _SettingsViewState extends State<SettingsView> {
             return const Center(child: CircularProgressIndicator());
           }
           final user = homeCubit.currentUserData;
-          final userName = user?['name'] ?? 'User Name';
-          final userEmail = user?['email'] ?? 'example@mail.com';
-          final imageUrl = user?['image_url'] as String?;
+          final userName = user!.name;
+          final userEmail = user.email;
+          final imageUrl = user.imageUrl;
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 UserData(
-                  name: userName,
+                  name: userName ?? '',
                   email: userEmail,
                   imageUrl: imageUrl,
                 ),
@@ -62,14 +62,13 @@ class _SettingsViewState extends State<SettingsView> {
                 SettingsTile(
                   icon: Icons.person_outline,
                   title: 'Change Profile Image',
-                  onTap: () async {
-                    await Navigator.push(
+                  onTap: () {
+                    Navigator.push(
                       context,
                       MaterialPageRoute<Object>(
                         builder: (_) => const ChangeProfileImageView(),
                       ),
                     );
-                    homeCubit.getCurrentUserData();
                   },
                 ),
                 SettingsTile(
@@ -89,7 +88,6 @@ class _SettingsViewState extends State<SettingsView> {
                   title: 'Logout',
                   textColor: Colors.red,
                   iconColor: Colors.red,
-
                   onTap: () => homeCubit.signOut(context),
                 ),
               ],

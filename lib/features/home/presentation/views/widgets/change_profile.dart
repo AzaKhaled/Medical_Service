@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 
 class ChangeProfileImageView extends StatefulWidget {
   const ChangeProfileImageView({super.key});
@@ -26,6 +27,7 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
 
   @override
   Widget build(BuildContext context) {
+    final userImageUrl = homeCubit.currentUserData?.imageUrl;
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
@@ -34,7 +36,7 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
         elevation: 0.8,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop,
           color: Colors.black87,
         ),
         centerTitle: true,
@@ -60,8 +62,12 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
                       backgroundColor: Colors.grey.shade300,
                       backgroundImage: _selectedImage != null
                           ? FileImage(_selectedImage!)
-                          : null, // لو مفيش صورة، بنرجع لـ child
-                      child: _selectedImage == null
+                          : (userImageUrl != null && userImageUrl.isNotEmpty)
+                          ? NetworkImage(userImageUrl)
+                          : null,
+                      child:
+                          (_selectedImage == null &&
+                              (userImageUrl == null || userImageUrl.isEmpty))
                           ? const Icon(
                               Icons.person,
                               size: 80,
@@ -113,7 +119,7 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
                       content: Text('Profile image updated successfully'),
                     ),
                   );
-                  Navigator.pop(context);
+                  context.pop;
                 } else if (state is HomeUploadProfileImageErrorState) {
                   ScaffoldMessenger.of(
                     context,

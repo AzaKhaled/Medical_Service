@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/appointment_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/info_icons.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/review_view.dart';
@@ -27,7 +28,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
   }
 
   Future<void> fetchReviewsCount() async {
-    final count = await context.read<HomeCubit>().getReviewsCount(
+    final count = await homeCubit.getReviewsCount(
       widget.doctor['id'].toString(),
     );
     setState(() {
@@ -44,7 +45,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.pop(context);
+            context.pop;
           },
         ),
       ),
@@ -92,7 +93,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                         color: Colors.red,
                       ),
                       onPressed: () {
-                        context.read<FavoriteCubit>().addToFavorites(
+                        favoriteCubit.addToFavorites(
                           widget.doctor['id'].toString(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(

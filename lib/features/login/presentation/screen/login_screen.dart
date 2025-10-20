@@ -14,7 +14,10 @@ import 'package:medical_service_app/features/login/presentation/widget/password_
 import 'package:medical_service_app/features/login/presentation/widget/unified_password_reset.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+
+  final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
+
+  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,7 @@ class LoginScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Form(
-                  key: homeCubit.loginFormKey,
+                  key: loginFormKey,
                   child: Column(
                     children: [
                       SizedBox(height: 15.h),
@@ -125,7 +128,7 @@ class LoginScreen extends StatelessWidget {
                       SizedBox(height: 35.h),
                       CustomButton(
                         onPressed: () {
-                          if (homeCubit.loginFormKey.currentState!.validate()) {
+                          if (loginFormKey.currentState!.validate()) {
                             homeCubit.login();
                           }
                         },

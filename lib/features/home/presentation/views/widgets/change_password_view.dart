@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChangePasswordView extends StatefulWidget {
@@ -29,7 +30,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('✅ Password changed successfully')),
         );
-        Navigator.pop(context);
+        context.pop;
       }
     } catch (e) {
       if (!mounted) return;
@@ -60,7 +61,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         elevation: 0.8,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop,
           color: Colors.black87,
         ),
         centerTitle: true,

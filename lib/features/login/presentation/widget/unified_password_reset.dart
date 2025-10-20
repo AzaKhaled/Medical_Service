@@ -177,7 +177,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute<Object>(
-                            builder: (_) => const LoginScreen(),
+                            builder: (_) => LoginScreen(),
                           ),
                         );
                       } on AuthException catch (e) {
