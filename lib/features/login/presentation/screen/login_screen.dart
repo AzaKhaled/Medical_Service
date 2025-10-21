@@ -14,7 +14,6 @@ import 'package:medical_service_app/features/login/presentation/widget/password_
 import 'package:medical_service_app/features/login/presentation/widget/unified_password_reset.dart';
 
 class LoginScreen extends StatelessWidget {
-
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
 
   LoginScreen({super.key});
@@ -70,14 +69,14 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-            
+
                       SizedBox(height: 32.h),
                       const Text(
                         'Welcome Back',
                         style: TextStyles.montserrat700_36,
                       ),
                       SizedBox(height: 24.h),
-            
+
                       // Email
                       CustomTextFormField(
                         controller: homeCubit.loginEmailController,
@@ -92,7 +91,7 @@ class LoginScreen extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 16.h),
-            
+
                       // Password
                       PasswordField(
                         controller: homeCubit.loginPasswordController,
@@ -113,7 +112,8 @@ class LoginScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute<Object>(
-                                  builder: (context) => const ResetPasswordView(),
+                                  builder: (context) =>
+                                      const ResetPasswordView(),
                                 ),
                               );
                             },
@@ -124,7 +124,7 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-            
+
                       SizedBox(height: 35.h),
                       CustomButton(
                         onPressed: () {
@@ -137,10 +137,10 @@ class LoginScreen extends StatelessWidget {
                             : "Login",
                       ),
                       SizedBox(height: 16.h),
-            
+
                       const OrDivider(),
                       SizedBox(height: 16.h),
-            
+
                       HaveAnAccountSection(
                         leadingText: 'Don\'t have an account?',
                         actionText: ' Sign Up',

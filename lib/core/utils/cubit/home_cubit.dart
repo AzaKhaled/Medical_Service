@@ -21,10 +21,10 @@ class HomeCubit extends Cubit<HomeStates> {
 
   static HomeCubit get(BuildContext context) => BlocProvider.of(context);
 
- List<CategoryModel> categories = [];
-List<DoctorModel> topDoctors = [];
- List<DoctorModel> allDoctors = [];
-List<DoctorModel> filteredDoctors = [];
+  List<CategoryModel> categories = [];
+  List<DoctorModel> topDoctors = [];
+  List<DoctorModel> allDoctors = [];
+  List<DoctorModel> filteredDoctors = [];
   //form
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
@@ -184,29 +184,33 @@ List<DoctorModel> filteredDoctors = [];
     try {
       final response = await supabase.from('doctors').select();
 
-      allDoctors =
-          (response as List).map((item) => DoctorModel.fromJson(item)).toList();
+      allDoctors = (response as List)
+          .map((item) => DoctorModel.fromJson(item))
+          .toList();
       filteredDoctors = List.from(allDoctors);
 
-      emit(HomeGetDoctorsSuccessState(filteredDoctors));
+      emit(HomeGetDoctorsSuccessState());
     } catch (e) {
       emit(HomeGetDoctorsErrorState(e.toString()));
     }
   }
+
   /// 🧠 دالة البحث
-   void searchDoctors(String query) {
+  void searchDoctors(String query) {
     if (query.isEmpty) {
       filteredDoctors = List.from(allDoctors);
     } else {
       filteredDoctors = allDoctors
-          .where((doctor) =>
-              doctor.name!.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (doctor) =>
+                doctor.name!.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     }
-    emit(HomeGetDoctorsSuccessState(filteredDoctors));
+    emit(HomeGetDoctorsSuccessState());
   }
 
-   Future<void> getDoctorsByCategory(String categoryId) async {
+  Future<void> getDoctorsByCategory(String categoryId) async {
     emit(HomeGetDoctorsLoadingState());
     try {
       final response = await supabase
@@ -214,14 +218,16 @@ List<DoctorModel> filteredDoctors = [];
           .select()
           .eq('specialty_id', categoryId);
 
-      filteredDoctors =
-          (response as List).map((e) => DoctorModel.fromJson(e)).toList();
+      filteredDoctors = (response as List)
+          .map((e) => DoctorModel.fromJson(e))
+          .toList();
 
-      emit(HomeGetDoctorsSuccessState(filteredDoctors));
+      emit(HomeGetDoctorsSuccessState());
     } catch (e) {
       emit(HomeGetDoctorsErrorState(e.toString()));
     }
   }
+
   // ✅ Get Top Rated Doctors (واحد من كل تخصص)
   Future<void> getTopRatedDoctors() async {
     emit(HomeGetDoctorsLoadingState());
@@ -231,8 +237,9 @@ List<DoctorModel> filteredDoctors = [];
           .select()
           .order('rating', ascending: false);
 
-      final doctors =
-          (response as List).map((e) => DoctorModel.fromJson(e)).toList();
+      final doctors = (response as List)
+          .map((e) => DoctorModel.fromJson(e))
+          .toList();
 
       // ناخد أعلى دكتور من كل تخصص
       final Map<String, DoctorModel> topMap = {};
@@ -248,8 +255,9 @@ List<DoctorModel> filteredDoctors = [];
       emit(HomeGetDoctorsErrorState(e.toString()));
     }
   }
+
   // ✅ Get Doctor By Id
- Future<DoctorModel?> getDoctorById(String doctorId) async {
+  Future<DoctorModel?> getDoctorById(String doctorId) async {
     try {
       final response = await supabase
           .from('doctors')

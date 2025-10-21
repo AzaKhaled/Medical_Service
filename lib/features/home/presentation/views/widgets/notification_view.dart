@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationsView extends StatelessWidget {
@@ -17,7 +18,7 @@ class NotificationsView extends StatelessWidget {
         title: const Text('notifications'),
         leading: GestureDetector(
           onTap: () {
-            Navigator.pop(context);
+            context.pop;
           },
           child: const Icon(Icons.arrow_back_ios, size: 18),
         ),

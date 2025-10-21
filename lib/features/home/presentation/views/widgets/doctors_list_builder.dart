@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medical_service_app/core/models/doctor_model.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/doctor_details_view.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/doctor_similar.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/doctorcard.dart';
 
@@ -42,35 +44,28 @@ class _DoctorsListBuilderState extends State<DoctorsListBuilder> {
           }
           if (state is HomeGetDoctorsSuccessState ||
               state is HomeGetTopRatedDoctorsSuccessState) {
-            final doctors = state is HomeGetDoctorsSuccessState
-                ? state.doctors
-                : (state as HomeGetTopRatedDoctorsSuccessState).doctors;
-
-            if (doctors.isEmpty) {
+            if (homeCubit.filteredDoctors.isEmpty) {
               return const Center(child: Text("No doctors found"));
             }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: doctors.length,
+              itemCount: homeCubit.filteredDoctors.length,
               itemBuilder: (context, index) {
-                final doctor = doctors[index];
+                final doctor = homeCubit.filteredDoctors[index];
                 return DoctorCard(
-                  imageUrl: doctor.image_url ?? "assets/images/doctor.jfif",
+                  imageUrl: doctor.imageUrl ?? "assets/images/doctor.jfif",
                   name: doctor.name ?? "Unknown",
-                  level: doctor.specialty_name ?? "Unknown",
-                  workTime: doctor.working_hours ?? "N/A",
-                  price: doctor.price ?? "0",
+                  level: doctor.specialtyName ?? "Unknown",
+                  workTime: doctor.workingHours ?? "N/A",
+                  price: doctor.price!,
                   rating: double.parse(
-                    (double.tryParse(doctor.rating?.toString() ?? "0") ??
-                            0.0)
+                    (double.tryParse(doctor.rating?.toString() ?? "0") ?? 0.0)
                         .toStringAsFixed(1),
                   ),
                   onDetails: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<Object>(
-                        builder: (context) => DoctorDetailsView(doctor: doctor),
-                      ),
+                    context.push<DoctorModel>(
+                      Routes.doctorDetailsRoute,
+                      arguments: doctor,
                     );
                   },
                 );

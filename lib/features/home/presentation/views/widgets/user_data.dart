@@ -6,6 +6,7 @@ class UserData extends StatelessWidget {
   final String? imageUrl;
 
   const UserData({
+    super.key,
     required this.name,
     required this.email,
     required this.imageUrl,
@@ -22,7 +23,7 @@ class UserData extends StatelessWidget {
           backgroundImage: imageUrl != null && imageUrl!.isNotEmpty
               ? NetworkImage(imageUrl!)
               : const AssetImage('assets/images/default_profile.png')
-                  as ImageProvider,
+                    as ImageProvider,
         ),
         const SizedBox(height: 12),
         Text(

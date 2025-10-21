@@ -13,7 +13,6 @@ import 'package:medical_service_app/features/login/presentation/widget/password_
 import 'package:medical_service_app/features/login/presentation/widget/public_offer_section.dart';
 
 class SignupScreen extends StatelessWidget {
-
   final GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
 
   SignupScreen({super.key});
@@ -74,7 +73,7 @@ class SignupScreen extends StatelessWidget {
                         style: TextStyles.montserrat700_36,
                       ),
                       SizedBox(height: 24.h),
-            
+
                       // Username
                       CustomTextFormField(
                         controller: homeCubit.signUpNameController,
@@ -89,7 +88,7 @@ class SignupScreen extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 16.h),
-            
+
                       // Email
                       CustomTextFormField(
                         controller: homeCubit.signUpEmailController,
@@ -104,7 +103,7 @@ class SignupScreen extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 16.h),
-            
+
                       // Password
                       PasswordField(
                         controller: homeCubit.signUpPasswordController,
@@ -117,10 +116,10 @@ class SignupScreen extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 16.h),
-            
+
                       const PublicOffireSection(),
                       SizedBox(height: 30.h),
-            
+
                       CustomButton(
                         onPressed: () {
                           if (signUpFormKey.currentState!.validate()) {
@@ -132,7 +131,7 @@ class SignupScreen extends StatelessWidget {
                             : "Register",
                       ),
                       SizedBox(height: 16.h),
-            
+
                       HaveAnAccountSection(
                         leadingText: 'Already have an account?',
                         actionText: ' Login',

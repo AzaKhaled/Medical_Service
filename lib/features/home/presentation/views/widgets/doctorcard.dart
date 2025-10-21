@@ -5,7 +5,7 @@ class DoctorCard extends StatelessWidget {
   final String name;
   final String level;
   final String workTime;
-  final String price;
+  final double price;
   final double rating;
   final VoidCallback onDetails;
 

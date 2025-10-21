@@ -68,11 +68,7 @@ class HomeGetCategoriesErrorState extends HomeStates {
 // ============== Doctors ==============
 class HomeGetDoctorsLoadingState extends HomeStates {}
 
-class HomeGetDoctorsSuccessState extends HomeStates {
-  final List<dynamic> doctors;
-
-  HomeGetDoctorsSuccessState(this.doctors);
-}
+class HomeGetDoctorsSuccessState extends HomeStates {}
 
 class HomeGetTopRatedDoctorsErrorState {}
 

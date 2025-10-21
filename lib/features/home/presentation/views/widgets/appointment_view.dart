@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/core/models/doctor_model.dart';
 
 class AppointmentView extends StatefulWidget {
-  final String doctorId;
-  const AppointmentView({super.key, required this.doctorId});
+  const AppointmentView({super.key});
 
   @override
   State<AppointmentView> createState() => _AppointmentViewState();
@@ -18,15 +16,17 @@ class _AppointmentViewState extends State<AppointmentView> {
   bool isLoading = true;
   int? selectedDay;
   String? selectedTime;
+  String? doctorId;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    doctorId = context.getArg() as String;
     _loadDoctorData();
   }
 
   Future<void> _loadDoctorData() async {
-    final data = await context.read<HomeCubit>().getDoctorById(widget.doctorId);
+    final data = await homeCubit.getDoctorById(doctorId ?? '');
     setState(() {
       doctorData = data;
       isLoading = false;
@@ -99,7 +99,7 @@ class _AppointmentViewState extends State<AppointmentView> {
     final specialty = doctorData!.specialtyName ?? '';
     final imageUrl = doctorData!.imageUrl ?? '';
     final workingHours = doctorData!.workingHours ?? '';
-    final workingDays = doctorData!.workingDays ?? [];
+    final workingDays = doctorData!.workingDays;
     final timeSlots = _generateTimeSlots(workingHours);
 
     return Scaffold(
@@ -134,7 +134,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                   backgroundImage: imageUrl.isNotEmpty
                       ? NetworkImage(imageUrl)
                       : const AssetImage("assets/images/doctor.jfif")
-                          as ImageProvider,
+                            as ImageProvider,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -285,8 +285,8 @@ class _AppointmentViewState extends State<AppointmentView> {
                             Duration(days: daysToAdd),
                           );
 
-                          await context.read<HomeCubit>().bookAppointment(
-                            doctorId: widget.doctorId,
+                          await homeCubit.bookAppointment(
+                            doctorId: doctorId ?? '',
                             appointmentDate: appointmentDate,
                             appointmentTime: selectedTime!,
                           );

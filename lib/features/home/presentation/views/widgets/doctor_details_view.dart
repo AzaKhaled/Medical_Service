@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medical_service_app/core/models/doctor_model.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/appointment_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/info_icons.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/review_view.dart';
 
 class DoctorDetailsView extends StatefulWidget {
-  const DoctorDetailsView({super.key, required this.doctor});
-
-  final Map<String, dynamic> doctor;
+  const DoctorDetailsView({super.key});
 
   @override
   State<DoctorDetailsView> createState() => _DoctorDetailsViewState();
@@ -20,16 +19,20 @@ class DoctorDetailsView extends StatefulWidget {
 class _DoctorDetailsViewState extends State<DoctorDetailsView> {
   bool isExpanded = false;
   int reviewsCount = 0;
+  late DoctorModel doctor;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    doctor =
+        context.getArg()
+            as DoctorModel; // ✅ نحصل على الـ DoctorModel من الـ arguments
     fetchReviewsCount();
   }
 
   Future<void> fetchReviewsCount() async {
     final count = await homeCubit.getReviewsCount(
-      widget.doctor['id'].toString(),
+      doctor.id.toString(),
     );
     setState(() {
       reviewsCount = count;
@@ -59,10 +62,10 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child:
-                      (widget.doctor['image_url'] != null &&
-                          widget.doctor['image_url'].toString().isNotEmpty)
+                      (doctor.imageUrl != null &&
+                          doctor.imageUrl.toString().isNotEmpty)
                       ? Image.network(
-                          widget.doctor['image_url'],
+                          doctor.imageUrl!,
                           height: 220,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -94,7 +97,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                       ),
                       onPressed: () {
                         favoriteCubit.addToFavorites(
-                          widget.doctor['id'].toString(),
+                          doctor.id.toString(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Added to favorites')),
@@ -111,7 +114,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.doctor['name'] ?? "Unknown Doctor",
+                  doctor.name ?? "Unknown Doctor",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -123,7 +126,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     const SizedBox(width: 4),
                     Text(
                       double.tryParse(
-                            widget.doctor['rating']?.toString() ?? "0",
+                            doctor.rating?.toString() ?? "0",
                           )?.toStringAsFixed(1) ??
                           "0.0",
                     ),
@@ -134,7 +137,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
             const SizedBox(height: 8),
 
             Text(
-              widget.doctor['specialty_name'] ?? "Unknown Specialty",
+              doctor.specialtyName ?? "Unknown Specialty",
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 16),
@@ -144,19 +147,19 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
               children: [
                 InfoCard(
                   icon: Icons.people,
-                  value: widget.doctor['patients_count']?.toString() ?? "0",
+                  value: doctor.patientsCount?.toString() ?? "0",
                   label: "Patients",
                 ),
                 InfoCard(
                   icon: Icons.task_alt,
-                  value: widget.doctor['experience_years']?.toString() ?? "0",
+                  value: doctor.experienceYears?.toString() ?? "0",
                   label: "Years",
                 ),
                 InfoCard(
                   icon: Icons.star,
                   value:
                       double.tryParse(
-                        widget.doctor['rating']?.toString() ?? "0",
+                        doctor.rating?.toString() ?? "0",
                       )?.toStringAsFixed(1) ??
                       "0.0",
                   label: "Rating",
@@ -172,7 +175,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                       context,
                       MaterialPageRoute<Object>(
                         builder: (context) => ReviewView(
-                          doctorId: widget.doctor['id'].toString(),
+                          doctorId: doctor.id.toString(),
                         ),
                       ),
                     );
@@ -182,11 +185,11 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                       if (!context.mounted) return;
                       final updatedDoctor = await context
                           .read<HomeCubit>()
-                          .getDoctorById(widget.doctor['id'].toString());
+                          .getDoctorById(doctor.id.toString());
 
                       if (updatedDoctor != null) {
                         setState(() {
-                          widget.doctor['rating'] = updatedDoctor.rating;
+                          doctor.rating = updatedDoctor.rating;
                         });
                       }
 
@@ -214,7 +217,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                 });
               },
               child: Text(
-                widget.doctor['bio'] ?? "No bio available",
+                doctor.bio ?? "No bio available",
                 maxLines: isExpanded ? null : 2,
                 overflow: isExpanded
                     ? TextOverflow.visible
@@ -239,16 +242,11 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute<Object>(
-                      builder: (context) => AppointmentView(
-                        doctorId: widget.doctor['id'].toString(),
-                      ),
-                    ),
+                  context.push<String>(
+                    Routes.appointmentsRoute,
+                    arguments: doctor.id.toString(),
                   );
                 },
-
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(

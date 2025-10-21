@@ -5,7 +5,7 @@ class DoctorModel {
   final String? specialtyName;
   final String? workingHours;
   final double? price;
-  final double? rating;
+  double? rating;
   final int? experienceYears;
   final int? patientsCount;
   final String? bio;
@@ -13,16 +13,16 @@ class DoctorModel {
   final List<int> workingDays;
 
   DoctorModel({
-     this.id,
-     this.name,
-     this.specialtyId,
-     this.specialtyName,
-     this.workingHours,
-     this.price,
-     this.rating,
-     this.experienceYears,
-     this.patientsCount,
-     this.bio,
+    this.id,
+    this.name,
+    this.specialtyId,
+    this.specialtyName,
+    this.workingHours,
+    this.price,
+    this.rating,
+    this.experienceYears,
+    this.patientsCount,
+    this.bio,
     required this.imageUrl,
     required this.workingDays,
   });

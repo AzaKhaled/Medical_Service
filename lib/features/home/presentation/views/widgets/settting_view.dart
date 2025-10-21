@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/change_password_view.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/change_profile.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/settings_tile.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/user_data.dart';
 
@@ -63,12 +64,7 @@ class _SettingsViewState extends State<SettingsView> {
                   icon: Icons.person_outline,
                   title: 'Change Profile Image',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<Object>(
-                        builder: (_) => const ChangeProfileImageView(),
-                      ),
-                    );
+                    context.push<Object>(Routes.changePasswordRoute);
                   },
                 ),
                 SettingsTile(
