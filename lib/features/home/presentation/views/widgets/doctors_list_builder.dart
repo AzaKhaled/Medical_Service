@@ -55,13 +55,13 @@ class _DoctorsListBuilderState extends State<DoctorsListBuilder> {
               itemBuilder: (context, index) {
                 final doctor = doctors[index];
                 return DoctorCard(
-                  imageUrl: doctor['image_url'] ?? "assets/images/doctor.jfif",
-                  name: doctor['name'] ?? "Unknown",
-                  level: doctor['specialty_name'] ?? "Unknown",
-                  workTime: doctor['working_hours'] ?? "N/A",
-                  price: doctor['price']?.toString() ?? "0",
+                  imageUrl: doctor.image_url ?? "assets/images/doctor.jfif",
+                  name: doctor.name ?? "Unknown",
+                  level: doctor.specialty_name ?? "Unknown",
+                  workTime: doctor.working_hours ?? "N/A",
+                  price: doctor.price ?? "0",
                   rating: double.parse(
-                    (double.tryParse(doctor['rating']?.toString() ?? "0") ??
+                    (double.tryParse(doctor.rating?.toString() ?? "0") ??
                             0.0)
                         .toStringAsFixed(1),
                   ),

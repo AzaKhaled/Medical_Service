@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
+import 'package:medical_service_app/core/models/doctor_model.dart';
 
 class AppointmentView extends StatefulWidget {
   final String doctorId;
@@ -13,7 +14,7 @@ class AppointmentView extends StatefulWidget {
 }
 
 class _AppointmentViewState extends State<AppointmentView> {
-  Map<String, dynamic>? doctorData;
+  DoctorModel? doctorData;
   bool isLoading = true;
   int? selectedDay;
   String? selectedTime;
@@ -94,12 +95,11 @@ class _AppointmentViewState extends State<AppointmentView> {
       return const Scaffold(body: Center(child: Text('Doctor not found')));
     }
 
-    final name = doctorData!['name'] ?? '';
-    final specialty = doctorData!['specialty_name'] ?? '';
-    final imageUrl = doctorData!['image_url'] ?? '';
-    final workingHours = doctorData!['working_hours'] ?? '';
-    final workingDays = (doctorData!['working_days'] as List<dynamic>? ?? [])
-        .cast<int>();
+    final name = doctorData!.name;
+    final specialty = doctorData!.specialtyName ?? '';
+    final imageUrl = doctorData!.imageUrl ?? '';
+    final workingHours = doctorData!.workingHours ?? '';
+    final workingDays = doctorData!.workingDays ?? [];
     final timeSlots = _generateTimeSlots(workingHours);
 
     return Scaffold(
@@ -134,7 +134,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                   backgroundImage: imageUrl.isNotEmpty
                       ? NetworkImage(imageUrl)
                       : const AssetImage("assets/images/doctor.jfif")
-                            as ImageProvider,
+                          as ImageProvider,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -142,7 +142,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        name!,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -278,9 +278,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                 onPressed: selectedDay != null && selectedTime != null
                     ? () async {
                         try {
-                          // احنا محتاجين التاريخ الكامل (اليوم القادم اللي مطابق لليوم المحدد)
                           final now = DateTime.now();
-                          // احسب الفرق بين اليوم الحالي واليوم اللي المستخدم اختاره
                           final int daysToAdd =
                               (selectedDay! - now.weekday) % 7;
                           final appointmentDate = now.add(

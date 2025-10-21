@@ -23,12 +23,12 @@ class SignupScreen extends StatelessWidget {
     return BlocConsumer<HomeCubit, HomeStates>(
       listener: (context, state) {
         if (state is HomeSignupSuccessState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Signup successful'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   const SnackBar(
+          //     content: Text('Signup successful'),
+          //     backgroundColor: Colors.green,
+          //   ),
+          // );
           context.pushReplacement<Object>(Routes.homeRoute);
         }
         if (state is HomeSignupErrorState) {

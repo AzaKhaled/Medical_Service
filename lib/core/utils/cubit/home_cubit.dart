@@ -4,6 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:medical_service_app/core/models/category_model.dart';
+import 'package:medical_service_app/core/models/doctor_model.dart';
 import 'package:medical_service_app/core/models/user_model.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_view.dart';
@@ -19,8 +21,10 @@ class HomeCubit extends Cubit<HomeStates> {
 
   static HomeCubit get(BuildContext context) => BlocProvider.of(context);
 
-  List<dynamic> categories = [];
-
+ List<CategoryModel> categories = [];
+List<DoctorModel> topDoctors = [];
+ List<DoctorModel> allDoctors = [];
+List<DoctorModel> filteredDoctors = [];
   //form
   final loginEmailController = TextEditingController();
   final loginPasswordController = TextEditingController();
@@ -94,13 +98,14 @@ class HomeCubit extends Cubit<HomeStates> {
 
       if (e.message.contains('already registered') ||
           e.message.contains('already exists')) {
-        emit(HomeSignupErrorState("هذا البريد مسجل بالفعل"));
+        emit(HomeSignupErrorState("Email already registered"));
       } else {
-        emit(HomeSignupErrorState(e.message));
+        // debugPrint("❌ Error signing up (AuthException): ${e.message}");
+        emit(HomeSignupErrorState("signup failed"));
       }
     } catch (e) {
       // debugPrint("❌ Unexpected error during signup: $e");
-      emit(HomeSignupErrorState(e.toString()));
+      emit(HomeSignupErrorState("Signup failed"));
     }
   }
 
@@ -159,76 +164,64 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
-
   // ✅ Get Categories
   Future<void> getCategories() async {
     emit(HomeGetCategoriesLoadingState());
     try {
       final response = await supabase.from('specialties').select();
-      categories = response;
-      // debugPrint("📥 specialties: $response");
-      emit(HomeGetCategoriesSuccessState(response));
+      categories = (response as List)
+          .map((item) => CategoryModel.fromJson(item))
+          .toList();
+
+      emit(HomeGetCategoriesSuccessState(categories));
     } catch (e) {
-      // debugPrint("❌ Error getting specialties: $e");
       emit(HomeGetCategoriesErrorState(e.toString()));
     }
   }
 
-  // ✅ Get Doctors
-  // Future<void> getDoctors() async {
-  //   emit(HomeGetDoctorsLoadingState());
-  //   try {
-  //     final response = await supabase.from('doctors').select();
-  //     // debugPrint("📥 Doctors: $response");
-  //     emit(HomeGetDoctorsSuccessState(response));
-  //   } catch (e) {
-  //     // debugPrint("❌ Error getting doctors: $e");
-  //     emit(HomeGetDoctorsErrorState(e.toString()));
-  //   }
-  // }
-  List<dynamic> allDoctors = []; // الأصلية
-  List<dynamic> filteredDoctors = []; // للعرض بعد البحث
-  // List<dynamic> favorites = [];
   Future<void> getDoctors() async {
     emit(HomeGetDoctorsLoadingState());
     try {
       final response = await supabase.from('doctors').select();
-      allDoctors = response;
-      filteredDoctors = List.from(allDoctors); // مبدئيًا نفسهم
+
+      allDoctors =
+          (response as List).map((item) => DoctorModel.fromJson(item)).toList();
+      filteredDoctors = List.from(allDoctors);
+
       emit(HomeGetDoctorsSuccessState(filteredDoctors));
     } catch (e) {
       emit(HomeGetDoctorsErrorState(e.toString()));
     }
   }
-
   /// 🧠 دالة البحث
-  void searchDoctors(String query) {
+   void searchDoctors(String query) {
     if (query.isEmpty) {
       filteredDoctors = List.from(allDoctors);
     } else {
-      filteredDoctors = allDoctors.where((doctor) {
-        final name = doctor['name'].toString().toLowerCase();
-        return name.contains(query.toLowerCase());
-      }).toList();
+      filteredDoctors = allDoctors
+          .where((doctor) =>
+              doctor.name!.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     }
-    debugPrint("🔍 Filtered doctors: $filteredDoctors");
     emit(HomeGetDoctorsSuccessState(filteredDoctors));
   }
 
-  Future<void> getDoctorsByCategory(String categoryId) async {
+   Future<void> getDoctorsByCategory(String categoryId) async {
     emit(HomeGetDoctorsLoadingState());
     try {
-      final response = await Supabase.instance.client
+      final response = await supabase
           .from('doctors')
           .select()
           .eq('specialty_id', categoryId);
 
-      emit(HomeGetDoctorsSuccessState(response));
+      filteredDoctors =
+          (response as List).map((e) => DoctorModel.fromJson(e)).toList();
+
+      emit(HomeGetDoctorsSuccessState(filteredDoctors));
     } catch (e) {
-      emit(HomeGetDoctorsErrorState(e.toString())); // <<-- positional
+      emit(HomeGetDoctorsErrorState(e.toString()));
     }
   }
-
   // ✅ Get Top Rated Doctors (واحد من كل تخصص)
   Future<void> getTopRatedDoctors() async {
     emit(HomeGetDoctorsLoadingState());
@@ -238,27 +231,25 @@ class HomeCubit extends Cubit<HomeStates> {
           .select()
           .order('rating', ascending: false);
 
-      // نعمل Map علشان ناخد أول دكتور من كل تخصص (أعلى تقييم)
-      final Map<String, dynamic> topDoctorsMap = {};
-      for (var doc in response) {
-        final specialty = doc['specialty_name'];
-        if (!topDoctorsMap.containsKey(specialty)) {
-          topDoctorsMap[specialty] = doc;
+      final doctors =
+          (response as List).map((e) => DoctorModel.fromJson(e)).toList();
+
+      // ناخد أعلى دكتور من كل تخصص
+      final Map<String, DoctorModel> topMap = {};
+      for (var doc in doctors) {
+        if (!topMap.containsKey(doc.specialtyName)) {
+          topMap[doc.specialtyName!] = doc;
         }
       }
 
-      final topDoctors = topDoctorsMap.values.toList();
-      // debugPrint("📥 Top Rated Doctors: $topDoctors");
-
+      topDoctors = topMap.values.toList();
       emit(HomeGetTopRatedDoctorsSuccessState(topDoctors));
     } catch (e) {
-      // debugPrint("❌ Error getting top rated doctors: $e");
       emit(HomeGetDoctorsErrorState(e.toString()));
     }
   }
-
   // ✅ Get Doctor By Id
-  Future<Map<String, dynamic>?> getDoctorById(String doctorId) async {
+ Future<DoctorModel?> getDoctorById(String doctorId) async {
     try {
       final response = await supabase
           .from('doctors')
@@ -266,91 +257,14 @@ class HomeCubit extends Cubit<HomeStates> {
           .eq('id', doctorId)
           .maybeSingle();
 
-      // debugPrint("📥 Doctor $doctorId details: $response");
-      return response;
+      if (response == null) return null;
+      return DoctorModel.fromJson(response);
     } catch (e) {
-      // debugPrint("❌ Error getting doctor by id: $e");
+      debugPrint("❌ Error getting doctor: $e");
       return null;
     }
   }
 
-  // ✅ Add Doctor to Favorites
-  //   Future<void> addToFavorites(String doctorId) async {
-  //     emit(HomeAddFavoriteLoadingState());
-  //     try {
-  //       final userId = supabase.auth.currentUser!.id;
-
-  //       // 🛑 تأكد إن الدكتور مش مضاف من قبل
-  //       final existing = await supabase
-  //           .from('favorites')
-  //           .select()
-  //           .eq('user_id', userId)
-  //           .eq('doctor_id', doctorId)
-  //           .maybeSingle();
-
-  //       if (existing != null) {
-  //         emit(HomeAddFavoriteAlreadyExistsState());
-  //         return;
-  //       }
-
-  //       // ✅ أضف الدكتور
-  //       final response = await supabase.from('favorites').insert({
-  //         'user_id': userId,
-  //         'doctor_id': doctorId,
-  //       }).select();
-
-  //       // ✅ مباشرة بعد الإضافة، استدعِ getFavorites لتحديث القائمة
-  //       await getFavorites();
-  //       debugPrint("✅ Added to favorites: $response");
-  //       favorites = response;
-  //       emit(HomeAddFavoriteSuccessState(response));
-  //     } catch (e) {
-  //       emit(HomeAddFavoriteErrorState(e.toString()));
-  //     }
-  //   }
-
-  //   // ✅ Remove Doctor from Favorites
-  //   Future<void> removeFromFavorites(String doctorId) async {
-  //     emit(HomeRemoveFavoriteLoadingState());
-  //     try {
-  //       final userId = supabase.auth.currentUser!.id;
-  //       await supabase
-  //           .from('favorites')
-  //           .delete()
-  //           .eq('user_id', userId)
-  //           .eq('doctor_id', doctorId);
-
-  //       // debugPrint("💔 Removed from favorites: $doctorId");
-
-  //       // بعد الحذف أرجع هات الفيفورتس من جديد
-  //       await getFavorites();
-  //     } catch (e) {
-  //       // debugPrint("❌ Error removing from favorites: $e");
-  //       emit(HomeRemoveFavoriteErrorState(e.toString()));
-  //     }
-  //   }
-
-  //   // ✅ Get All Favorites for Logged User
-  //   Future<void> getFavorites() async {
-  //   emit(HomeGetFavoritesLoadingState());
-  //   try {
-  //     final userId = supabase.auth.currentUser!.id;
-
-  //     final response = await supabase
-  //         .from('favorites')
-  //         .select('doctor_id, doctors(*)')
-  //         .eq('user_id', userId);
-
-  //     debugPrint("📥 Favorites: $response");
-
-  //     emit(HomeGetFavoritesSuccessState(response));
-  //   } catch (e) {
-  //     debugPrint("❌ Error getting favorites: $e");
-  //     emit(HomeGetFavoritesErrorState(e.toString()));
-  //   }
-  // }
-
-  // ✅ Add Review (تعليق جديد)
   Future<void> addReview({
     required String doctorId,
     required double rating,

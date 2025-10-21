@@ -32,9 +32,3 @@ class _HomeViewBodyState extends State<HomeViewBody> {
     );
   }
 }
-
-//  مثال: السماح للمستخدم بقراءة الإشعارات الخاصة به فقط
-// CREATE POLICY "Users can read their own notifications"
-// ON public.notifications
-// FOR SELECT
-// USING (auth.uid() = user_id);

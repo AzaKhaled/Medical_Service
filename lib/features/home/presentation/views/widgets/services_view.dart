@@ -60,12 +60,12 @@ class _ServicesViewState extends State<ServicesView> {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: visibleItems.map<Widget>((cat) {
-                    final catName = cat['name'] ?? "Unknown";
+                    final catName = cat.name ?? "Unknown";
                     final icon = serviceIcons[catName] ?? Icons.local_hospital;
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          homeCubit.getDoctorsByCategory(cat['id'].toString());
+                          homeCubit.getDoctorsByCategory(cat.id!);
                         },
                         child: Container(
                           margin: const EdgeInsets.all(8),

@@ -186,7 +186,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
 
                       if (updatedDoctor != null) {
                         setState(() {
-                          widget.doctor['rating'] = updatedDoctor['rating'];
+                          widget.doctor['rating'] = updatedDoctor.rating;
                         });
                       }
 

@@ -24,12 +24,12 @@ class LoginScreen extends StatelessWidget {
     return BlocConsumer<HomeCubit, HomeStates>(
       listener: (context, state) {
         if (state is HomeLoginSuccessState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Login successful'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   const SnackBar(
+          //     content: Text('Login successful'),
+          //     backgroundColor: Colors.green,
+          //   ),
+          // );
           context.pushReplacement<Widget>(Routes.homeRoute);
         }
         if (state is HomeLoginErrorState) {

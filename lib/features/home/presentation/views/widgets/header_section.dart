@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/custom_search.dart';
@@ -113,6 +114,8 @@ class _HeaderSectionState extends State<HeaderSection> {
                       color: Colors.black,
                     ),
                     onPressed: () {
+          // context.pushNamed<Widget>(Routes.notificationsRoute);
+
                       Navigator.pushNamed(
                         context,
                         '/notifications',
