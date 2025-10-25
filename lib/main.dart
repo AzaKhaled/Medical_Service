@@ -1,22 +1,22 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:medical_service_app/features/login/presentation/widget/password_reset.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:app_links/app_links.dart';
+
 import 'package:medical_service_app/core/utils/constants/my_bloc_observer.dart';
 import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-// 🔔 متغير الإشعارات المحلية
-// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-//     FlutterLocalNotificationsPlugin();
-
-/// 🧠 دالة يتم استدعاؤها لما توصلك إشعارات والتطبيق في الخلفية أو مقفول
+/// 🧠 دالة لمعالجة الإشعارات لما التطبيق في الخلفية أو مقفول
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
@@ -53,13 +53,10 @@ Future<void> main() async {
   // ✅ 2) إعداد FCM
   final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // 🔐 طلب الإذن من المستخدم (مهم لـ iOS)
-  await messaging.requestPermission();
-
-  // 🧠 استقبال رسائل في الخلفية
+  await messaging.requestPermission(); // إذن الإشعارات
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // 🧠 استقبال رسائل أثناء فتح التطبيق (Foreground)
+  // 🧠 استقبال إشعارات أثناء فتح التطبيق
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     debugPrint('📨 إشعار Foreground: ${message.notification?.title}');
 
@@ -69,7 +66,6 @@ Future<void> main() async {
     }
     if (user == null) return;
 
-    // 🆔 هات الـ id من جدول users
     final userResponse = await Supabase.instance.client
         .from('users')
         .select('id')
@@ -107,17 +103,64 @@ Future<void> main() async {
   runApp(const MedicalService());
 }
 
-class MedicalService extends StatelessWidget {
+class MedicalService extends StatefulWidget {
   const MedicalService({super.key});
+
+  @override
+  State<MedicalService> createState() => _MedicalServiceState();
+}
+
+class _MedicalServiceState extends State<MedicalService> {
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinks();
+  }
+
+  Future<void> _initDeepLinks() async {
+    _appLinks = AppLinks();
+
+    // 🎯 لو التطبيق شغال وجاله لينك
+    _linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
+      if (uri != null && uri.host == 'reset-password') {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          navigatorKey.currentState?.pushReplacement(
+            MaterialPageRoute(builder: (_) => const ResetPasswordView()),
+          );
+        });
+      }
+    });
+
+    // 🎯 لو التطبيق اتفتح من لينك وهو مقفول
+    final initialUri = await _appLinks.getInitialLink();
+
+    if (initialUri != null && initialUri.host == 'reset-password') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // ✅ استخدمي Future.microtask لتأخير التنفيذ بعد بناء الواجهة
+        Future.microtask(() {
+          navigatorKey.currentState?.pushReplacement(
+            MaterialPageRoute(builder: (_) => const ResetPasswordView()),
+          );
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => HomeCubit()..initNotifications()),
-        BlocProvider(
-          create: (context) => FavoriteCubit()..getFavorites(),
-        ), // 🟢 أضفها هنا
+        BlocProvider(create: (context) => FavoriteCubit()..getFavorites()),
       ],
       child: BlocBuilder<HomeCubit, HomeStates>(
         builder: (context, state) {

@@ -1,9 +1,11 @@
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/utils/constants/app_text_styles.dart';
 import 'package:medical_service_app/core/utils/constants/custombutton.dart';
 import 'package:medical_service_app/core/utils/constants/customtextfiled.dart';
-import 'package:medical_service_app/features/login/presentation/screen/login_screen.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/login/presentation/widget/password_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,6 +26,38 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
       TextEditingController();
 
   bool _isResetMode = false;
+
+  final _appLinks = AppLinks(); // ✅ لقراءة اللينكات
+
+  @override
+  void initState() {
+    super.initState();
+    _handleIncomingLinks(); // ✅ متابعة الروابط القادمة
+  }
+
+  Future<void> _handleIncomingLinks() async {
+    try {
+      // ✅ أول لينك فتح التطبيق
+      final uri = await _appLinks.getInitialLink();
+
+      if (uri != null && uri.queryParameters['type'] == 'recovery') {
+        setState(() {
+          _isResetMode = true;
+        });
+      }
+
+      // ✅ لو التطبيق مفتوح واتفتح بلينك جديد
+      _appLinks.uriLinkStream.listen((uri) {
+        if (uri != null && uri.queryParameters['type'] == 'recovery') {
+          setState(() {
+            _isResetMode = true;
+          });
+        }
+      });
+    } catch (e) {
+      debugPrint('❌ AppLinks error: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -105,9 +139,6 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                             backgroundColor: Colors.green,
                           ),
                         );
-                        setState(() {
-                          _isResetMode = true;
-                        });
                       } on AuthException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -174,12 +205,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                           ),
                         );
                         if (!context.mounted) return;
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute<Object>(
-                            builder: (_) => LoginScreen(),
-                          ),
-                        );
+                        context.pushReplacement<Object>(Routes.loginRoute);
                       } on AuthException catch (e) {
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(

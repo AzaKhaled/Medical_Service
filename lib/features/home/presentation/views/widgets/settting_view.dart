@@ -35,6 +35,7 @@ class _SettingsViewState extends State<SettingsView> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black87,
+        automaticallyImplyLeading: false,
       ),
       body: BlocBuilder<HomeCubit, HomeStates>(
         buildWhen: (previous, current) =>
@@ -64,19 +65,20 @@ class _SettingsViewState extends State<SettingsView> {
                   icon: Icons.person_outline,
                   title: 'Change Profile Image',
                   onTap: () {
-                    context.push<Object>(Routes.changePasswordRoute);
+                    context.push<Object>(Routes.changeProfileRoute);
                   },
                 ),
                 SettingsTile(
                   icon: Icons.lock_outline,
                   title: 'Change Password',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<Object>(
-                        builder: (_) => const ChangePasswordView(),
-                      ),
-                    );
+                    context.push<Object>(Routes.changePasswordRoute);
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute<Object>(
+                    //     builder: (_) => const ChangePasswordView(),
+                    //   ),
+                    //);
                   },
                 ),
                 SettingsTile(

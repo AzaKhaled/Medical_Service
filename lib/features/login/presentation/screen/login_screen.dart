@@ -11,7 +11,7 @@ import 'package:medical_service_app/core/utils/extensions/context_extension.dart
 import 'package:medical_service_app/features/login/presentation/widget/have_an_account_section.dart';
 import 'package:medical_service_app/features/login/presentation/widget/or_divider.dart';
 import 'package:medical_service_app/features/login/presentation/widget/password_field.dart';
-import 'package:medical_service_app/features/login/presentation/widget/unified_password_reset.dart';
+import 'package:medical_service_app/features/login/presentation/widget/password_reset.dart';
 
 class LoginScreen extends StatelessWidget {
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
@@ -34,7 +34,7 @@ class LoginScreen extends StatelessWidget {
         if (state is HomeLoginErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.message),
+              content: Text("email or password is incorrect:"),
               backgroundColor: Colors.red,
             ),
           );

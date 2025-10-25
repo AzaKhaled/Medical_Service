@@ -10,7 +10,7 @@ class DoctorModel {
   final int? patientsCount;
   final String? bio;
   final String? imageUrl;
-  final List<int> workingDays;
+  final List<int>? workingDays;
 
   DoctorModel({
     this.id,
@@ -23,8 +23,8 @@ class DoctorModel {
     this.experienceYears,
     this.patientsCount,
     this.bio,
-    required this.imageUrl,
-    required this.workingDays,
+     this.imageUrl,
+     this.workingDays,
   });
 
   factory DoctorModel.fromJson(Map<String, dynamic> json) {
@@ -42,7 +42,7 @@ class DoctorModel {
       imageUrl: json['image_url'] as String? ?? '',
       workingDays: (json['working_days'] as List<dynamic>)
           .map((e) => e as int)
-          .toList(),
+          .toList()??[],
     );
   }
 

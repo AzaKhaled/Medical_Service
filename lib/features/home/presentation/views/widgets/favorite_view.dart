@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_state.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_shimmer.dart';
 
 class FavoriteView extends StatefulWidget {
   const FavoriteView({super.key});
@@ -40,7 +41,7 @@ class _FavoriteViewState extends State<FavoriteView> {
           debugPrint('🟢 UI received favorites: ');
 
           if (state is HomeGetFavoritesLoadingState) {
-            return const Center(child: CircularProgressIndicator());
+            return const FavoriteShimmer();
           } else if (state is HomeGetFavoritesSuccessState) {
             final favorites = state.favorites;
             if (favorites.isEmpty) {

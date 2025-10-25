@@ -6,6 +6,8 @@ import 'package:medical_service_app/features/home/presentation/views/widgets/cha
 import 'package:medical_service_app/features/home/presentation/views/widgets/doctor_details_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/notification_view.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/payment_view.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/review_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/settting_view.dart';
 import 'package:medical_service_app/features/login/presentation/screen/login_screen.dart';
 import 'package:medical_service_app/features/signup/presentation/screen/signup_screen.dart';
@@ -21,7 +23,8 @@ class Routes {
   static const String changeProfileRoute = '/changeProfile';
   static const String changePasswordRoute = '/changePassword';
   static const String doctorDetailsRoute = '/doctorDetails';
-
+  static const String reviewRoute = '/reviews';
+  static const String paymentRoute = '/payment';
   static Map<String, WidgetBuilder> get routes => {
     homeRoute: (context) => const HomeView(),
     favoriteRoute: (context) => const FavoriteView(),
@@ -33,5 +36,7 @@ class Routes {
     changeProfileRoute: (context) => const ChangeProfileImageView(),
     changePasswordRoute: (context) => const ChangePasswordView(),
     doctorDetailsRoute: (context) => const DoctorDetailsView(),
+    reviewRoute: (context) => const ReviewView(),
+    paymentRoute: (context) => const PaymentView(),
   };
 }

@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  app_links: ^6.0.1
+  bloc: ^9.1.0
   cupertino_icons: ^1.0.8
   firebase_core: ^4.2.0
   firebase_messaging: ^16.0.3
@@ -36,6 +38,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_launcher_icons: ^0.14.4
   flutter_local_notifications: ^19.5.0
+  flutter_paypal_payment: ^1.0.8
   flutter_rating_bar: ^4.0.1
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.2.1
@@ -47,8 +50,7 @@ dependencies:
   smooth_page_indicator: ^1.2.1
   supabase_flutter: ^2.10.3
   timeago: ^3.7.1
-
-  bloc: ^9.1.0
+  webview_flutter: ^4.13.0
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:medical_service_app/core/service/paymob_service.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/core/models/doctor_model.dart';
+import 'package:medical_service_app/core/models/appointment_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/appointment_shimmer.dart';
 
 class AppointmentView extends StatefulWidget {
   const AppointmentView({super.key});
@@ -18,10 +23,13 @@ class _AppointmentViewState extends State<AppointmentView> {
   String? selectedTime;
   String? doctorId;
 
+  List<AppointmentModel> bookedAppointments = [];
+  final supabase = Supabase.instance.client;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    doctorId = context.getArg() as String;
+    doctorId = context.getArg() as String?;
     _loadDoctorData();
   }
 
@@ -31,6 +39,25 @@ class _AppointmentViewState extends State<AppointmentView> {
       doctorData = data;
       isLoading = false;
     });
+  }
+
+  Future<void> _fetchBookedTimesForDay(int dayIndex) async {
+    if (doctorId == null) return;
+
+    final allAppointments = await homeCubit.getAppointmentsByDoctorId(doctorId!);
+
+    final now = DateTime.now();
+    final selectedDate = now.add(
+      Duration(days: (dayIndex - now.weekday) % 7),
+    );
+
+    bookedAppointments = allAppointments.where((a) {
+      return a.appointmentDate!.year == selectedDate.year &&
+          a.appointmentDate!.month == selectedDate.month &&
+          a.appointmentDate!.day == selectedDate.day;
+    }).toList();
+
+    setState(() {});
   }
 
   List<String> _generateTimeSlots(String workingHours) {
@@ -87,21 +114,6 @@ class _AppointmentViewState extends State<AppointmentView> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (doctorData == null) {
-      return const Scaffold(body: Center(child: Text('Doctor not found')));
-    }
-
-    final name = doctorData!.name;
-    final specialty = doctorData!.specialtyName ?? '';
-    final imageUrl = doctorData!.imageUrl ?? '';
-    final workingHours = doctorData!.workingHours ?? '';
-    final workingDays = doctorData!.workingDays;
-    final timeSlots = _generateTimeSlots(workingHours);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Book Appointment'),
@@ -110,223 +122,255 @@ class _AppointmentViewState extends State<AppointmentView> {
           onPressed: () => context.pop,
         ),
       ),
-      body: Column(
-        children: [
-          // Doctor Card
-          Container(
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade300,
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
+      body: isLoading
+          ? const DoctorShimmerLoading()
+          : doctorData == null
+              ? const Center(child: Text('Doctor not found'))
+              : _buildAppointmentBody(),
+    );
+  }
+
+  Widget _buildAppointmentBody() {
+    final name = doctorData!.name;
+    final specialty = doctorData!.specialtyName ?? '';
+    final imageUrl = doctorData!.imageUrl ?? '';
+    final workingHours = doctorData!.workingHours ?? '';
+    final workingDays = doctorData!.workingDays;
+    final timeSlots = _generateTimeSlots(workingHours);
+
+    return Column(
+      children: [
+        // Doctor Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade300,
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundImage: imageUrl.isNotEmpty
+                    ? NetworkImage(imageUrl)
+                    : const AssetImage("assets/images/doctor.jfif")
+                        as ImageProvider,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name ?? '',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      specialty,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundImage: imageUrl.isNotEmpty
-                      ? NetworkImage(imageUrl)
-                      : const AssetImage("assets/images/doctor.jfif")
-                            as ImageProvider,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name!,
-                        style: const TextStyle(
-                          fontSize: 20,
+              ),
+            ],
+          ),
+        ),
+
+        // Days
+        SizedBox(
+          height: 80,
+          child: Center(
+            child: Wrap(
+              spacing: 12,
+              children: List.generate(workingDays!.length, (index) {
+                final dayIndex = workingDays[index];
+                final isSelected = selectedDay == dayIndex;
+                return GestureDetector(
+                  onTap: () async {
+                    setState(() {
+                      selectedDay = dayIndex;
+                      selectedTime = null;
+                      bookedAppointments = [];
+                      isLoading = true;
+                    });
+                    await _fetchBookedTimesForDay(dayIndex);
+                    setState(() => isLoading = false);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.all(12),
+                    width: 70,
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primaryColor : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _dayName(dayIndex),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black87,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        specialty,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                );
+              }),
             ),
           ),
+        ),
 
-          // Days in Center
-          SizedBox(
-            height: 80,
-            child: Center(
-              child: Wrap(
-                spacing: 12,
-                children: List.generate(workingDays.length, (index) {
-                  final dayIndex = workingDays[index];
-                  final isSelected = selectedDay == dayIndex;
-                  return GestureDetector(
-                    onTap: () => setState(() => selectedDay = dayIndex),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      padding: const EdgeInsets.all(12),
-                      width: 70,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primaryColor
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          if (isSelected)
-                            BoxShadow(
-                              color: Colors.grey.shade400,
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                        ],
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _dayName(dayIndex),
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
-                            fontWeight: FontWeight.bold,
-                          ),
+        const SizedBox(height: 20),
+
+        // Time slots
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GridView.builder(
+              itemCount: timeSlots.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 2.8,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemBuilder: (context, index) {
+                final time = timeSlots[index];
+                final isSelected = selectedTime == time;
+                final isBooked = bookedAppointments.any(
+                  (a) => a.appointmentTime == time,
+                );
+
+                return GestureDetector(
+                  onTap: isBooked
+                      ? null
+                      : () => setState(() => selectedTime = time),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: isBooked
+                          ? Colors.grey.shade300
+                          : (isSelected
+                              ? AppColors.primaryColor
+                              : Colors.white),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Center(
+                      child: Text(
+                        time,
+                        style: TextStyle(
+                          color: isBooked
+                              ? Colors.grey
+                              : (isSelected ? Colors.white : Colors.black87),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                  );
-                }),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Time slots
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.builder(
-                itemCount: timeSlots.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 2.8,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                ),
-                itemBuilder: (context, index) {
-                  final time = timeSlots[index];
-                  final isSelected = selectedTime == time;
-                  return GestureDetector(
-                    onTap: () => setState(() => selectedTime = time),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primaryColor
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          if (isSelected)
-                            BoxShadow(
-                              color: Colors.grey.shade400,
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                        ],
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Center(
-                        child: Text(
-                          time,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Confirm Button
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
                   ),
-                  backgroundColor: AppColors.primaryColor,
-                  elevation: 6,
+                );
+              },
+            ),
+          ),
+        ),
+
+        // Confirm Button
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                onPressed: selectedDay != null && selectedTime != null
-                    ? () async {
-                        try {
-                          final now = DateTime.now();
-                          final int daysToAdd =
-                              (selectedDay! - now.weekday) % 7;
-                          final appointmentDate = now.add(
-                            Duration(days: daysToAdd),
-                          );
+                backgroundColor: AppColors.primaryColor,
+              ),
+              onPressed: selectedDay != null && selectedTime != null
+                  ? () async {
+                      try {
+                        final now = DateTime.now();
+                        final int daysToAdd = (selectedDay! - now.weekday) % 7;
+                        final appointmentDate = now.add(
+                          Duration(days: daysToAdd),
+                        );
 
-                          await homeCubit.bookAppointment(
-                            doctorId: doctorId ?? '',
-                            appointmentDate: appointmentDate,
-                            appointmentTime: selectedTime!,
-                          );
+                        // ✅ احجز الموعد واحصل على الـ appointmentId
+                        final appointmentId = await homeCubit.bookAppointment(
+                          doctorId: doctorId ?? '',
+                          appointmentDate: appointmentDate,
+                          appointmentTime: selectedTime!,
+                        );
 
-                          if (!context.mounted) return;
+                        final int amountInCents =
+                            ((doctorData?.price ?? 50) * 100).toInt();
+
+                        // ✅ إنشاء paymentKey من Paymob
+                        final paymentKey = await generatePayMobPaymentKey(
+                          amount: amountInCents,
+                          doctorId: doctorId!,
+                          appointmentDate: appointmentDate,
+                          appointmentTime: selectedTime!,
+                        );
+
+                        final userId = supabase.auth.currentUser?.id ?? '';
+
+                        if (!context.mounted) return;
+
+                        // ✅ فتح صفحة الدفع وتمرير كل البيانات
+                        context.push(
+                          Routes.paymentRoute,
+                          arguments: {
+                            'paymentKey': paymentKey,
+                            'iframeId': 972484,
+                            'amount': (doctorData?.price ?? 50),
+                            'userId': userId,
+                            'doctorId': doctorId,
+                            'appointmentId': appointmentId,
+                          },
+                        );
+                      } catch (e) {
+                        if (mounted) {
+                          debugPrint("❌ Error: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("✅ تم حجز الموعد بنجاح"),
-                              backgroundColor: Colors.green,
+                            SnackBar(
+                              content: Text("حدث خطأ: $e"),
+                              backgroundColor: Colors.red,
                             ),
                           );
-                          setState(() {
-                            selectedDay = null;
-                            selectedTime = null;
-                          });
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(e.toString()),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
                         }
                       }
-                    : null,
-                child: const Text(
-                  "Confirm Appointment",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                    }
+                  : null,
+              child: const Text(
+                "Confirm Appointment",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

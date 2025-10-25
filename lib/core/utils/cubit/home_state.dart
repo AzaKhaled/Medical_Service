@@ -80,6 +80,17 @@ class HomeGetDoctorsErrorState extends HomeStates {
   HomeGetDoctorsErrorState(this.error);
 }
 
+class HomeGetDoctorByIdSuccessState extends HomeStates {
+  final dynamic doctor;
+
+  HomeGetDoctorByIdSuccessState(this.doctor);
+}
+class HomeGetDoctorByIdErrorState extends HomeStates {
+  final String error;
+
+  HomeGetDoctorByIdErrorState(this.error);
+}
+class HomeGetDoctorByIdLoadingState extends HomeStates {}
 class HomeGetTopRatedDoctorsSuccessState extends HomeStates {
   final List<dynamic> doctors;
 
@@ -144,6 +155,20 @@ class HomeAddReviewErrorState extends HomeStates {
 
   HomeAddReviewErrorState(this.error);
 }
+// ============== Appointments ==============
+class HomeGetAppointmentsLoadingState extends HomeStates {}
+
+class HomeGetAppointmentsSuccessState extends HomeStates {
+  final List<dynamic> appointments;
+
+  HomeGetAppointmentsSuccessState(this.appointments);
+}
+
+class HomeGetAppointmentsErrorState extends HomeStates {
+  final String error;
+
+  HomeGetAppointmentsErrorState(this.error);
+}
 
 // Get Reviews
 class HomeGetReviewsLoadingState extends HomeStates {}
@@ -190,3 +215,9 @@ class HomeNotificationsLoadedState extends HomeStates {
 class HomeNotificationsLoadingState {}
 
 class HomeNotificationsUpdatedState extends HomeStates {}
+class HomePaymentLoadingState extends HomeStates {}
+class HomePaymentSuccessState extends HomeStates {}
+class HomePaymentErrorState extends HomeStates {
+  final String message;
+  HomePaymentErrorState(this.message);
+}

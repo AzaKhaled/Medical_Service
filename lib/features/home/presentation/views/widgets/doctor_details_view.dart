@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/models/doctor_model.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/constants/routes.dart';
@@ -7,7 +6,6 @@ import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/info_icons.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/review_view.dart';
 
 class DoctorDetailsView extends StatefulWidget {
   const DoctorDetailsView({super.key});
@@ -170,33 +168,15 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     value: reviewsCount.toString(),
                     label: "Reviews",
                   ),
-                  onTap: () async {
-                    final refresh = await Navigator.push(
-                      context,
-                      MaterialPageRoute<Object>(
-                        builder: (context) => ReviewView(
-                          doctorId: doctor.id.toString(),
-                        ),
-                      ),
-                    );
+                 onTap: () async {
+    context.push(
+    Routes.reviewRoute,
+    arguments: doctor.id.toString(),
+  );
 
-                    if (refresh == true) {
-                      // ✅ هات الدكتور المحدث
-                      if (!context.mounted) return;
-                      final updatedDoctor = await context
-                          .read<HomeCubit>()
-                          .getDoctorById(doctor.id.toString());
+},
 
-                      if (updatedDoctor != null) {
-                        setState(() {
-                          doctor.rating = updatedDoctor.rating;
-                        });
-                      }
 
-                      // ✅ هات عدد الريفيوهات الجديد
-                      fetchReviewsCount();
-                    }
-                  },
                 ),
               ],
             ),
@@ -247,6 +227,8 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     arguments: doctor.id.toString(),
                   );
                 },
+                
+                
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -266,3 +248,24 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
     );
   }
 }
+
+
+
+
+
+
+// if (refresh == true) {
+  //   if (!context.mounted) return;
+
+  //   final updatedDoctor = await context
+  //       .read<HomeCubit>()
+  //       .getDoctorById(doctor.id.toString());
+
+  //   if (updatedDoctor != null) {
+  //     setState(() {
+  //       doctor.rating = updatedDoctor.rating;
+  //     });
+  //   }
+
+  //   fetchReviewsCount();
+  // }

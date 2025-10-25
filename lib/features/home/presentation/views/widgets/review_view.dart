@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/custom_search.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/review_item.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/review_shimmer.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ReviewView extends StatefulWidget {
-  const ReviewView({super.key, required this.doctorId});
-
-  final String doctorId;
+  const ReviewView({super.key});
 
   @override
   State<ReviewView> createState() => _ReviewViewState();
@@ -19,11 +19,14 @@ class ReviewView extends StatefulWidget {
 class _ReviewViewState extends State<ReviewView> {
   final TextEditingController commentController = TextEditingController();
   double selectedRating = 0;
+  late String doctorId;
 
   @override
-  void initState() {
-    super.initState();
-    HomeCubit.get(context).getReviews(widget.doctorId);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ✅ هنا بنجيب doctorId من الـ arguments اللي اتبعتت
+    doctorId = context.getArg() as String;
+    HomeCubit.get(context).getReviews(doctorId);
   }
 
   @override
@@ -37,17 +40,16 @@ class _ReviewViewState extends State<ReviewView> {
         title: const Text('Reviews'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context, true),
+          onPressed: () => context.pop,
         ),
       ),
       body: Column(
         children: [
-          // ✅ عرض التعليقات
           Expanded(
             child: BlocBuilder<HomeCubit, HomeStates>(
               builder: (context, state) {
                 if (state is HomeGetReviewsLoadingState) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ReviewShimmer();
                 } else if (state is HomeGetReviewsSuccessState) {
                   final reviews = state.reviews;
 
@@ -60,16 +62,13 @@ class _ReviewViewState extends State<ReviewView> {
                     itemCount: reviews.length,
                     itemBuilder: (context, index) {
                       final review = reviews[index];
-
                       final userName = review['user_name'] ?? "Unknown";
-
                       final createdAt = DateTime.tryParse(
                         review['created_at'] ?? "",
                       );
                       final timeAgoText = createdAt != null
                           ? timeago.format(createdAt, locale: 'en')
                           : "";
-
                       final imageUrl = review['user_image'] ?? "";
 
                       return ReviewItem(
@@ -89,7 +88,7 @@ class _ReviewViewState extends State<ReviewView> {
             ),
           ),
 
-          // ✅ الريتنج + إدخال تعليق جديد
+          // ✅ خانة التقييم والتعليق
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
@@ -104,7 +103,6 @@ class _ReviewViewState extends State<ReviewView> {
             ),
             child: Column(
               children: [
-                // ⭐️ ويدجت اختيار النجوم
                 RatingBar.builder(
                   initialRating: selectedRating,
                   minRating: 1,
@@ -122,7 +120,6 @@ class _ReviewViewState extends State<ReviewView> {
                 ),
                 const SizedBox(height: 12),
 
-                // 📝 خانة الكومنت + زر الإرسال + صورة المستخدم
                 Row(
                   children: [
                     GestureDetector(
@@ -130,7 +127,7 @@ class _ReviewViewState extends State<ReviewView> {
                         if (commentController.text.trim().isNotEmpty &&
                             selectedRating > 0) {
                           homeCubit.addReview(
-                            doctorId: widget.doctorId,
+                            doctorId: doctorId,
                             rating: selectedRating,
                             comment: commentController.text.trim(),
                           );

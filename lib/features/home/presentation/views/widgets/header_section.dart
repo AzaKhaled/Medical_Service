@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
+import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
+import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/custom_search.dart';
+import 'package:medical_service_app/features/home/presentation/views/widgets/header_shimmer.dart';
 
 class HeaderSection extends StatefulWidget {
   const HeaderSection({super.key});
@@ -38,12 +41,7 @@ class _HeaderSectionState extends State<HeaderSection> {
         final userData = homeCubit.currentUserData;
         // 🟡 لو البيانات لم تُحمّل بعد
         if (state is HomeGetUserLoadingState || userData == null) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 40),
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
-            ),
-          );
+          return const UserHeaderShimmer();
         }
 
         // 🟥 لو حصل خطأ
@@ -113,12 +111,12 @@ class _HeaderSectionState extends State<HeaderSection> {
                       color: Colors.black,
                     ),
                     onPressed: () {
-                      // context.pushNamed<Widget>(Routes.notificationsRoute);
+                      context.push<Widget>(Routes.notificationsRoute);
 
-                      Navigator.pushNamed(
-                        context,
-                        '/notifications',
-                      ); // نعمل Route للصفحة الجديدة
+                      // Navigator.pushNamed(
+                      //   context,
+                      //   '/notifications',
+                      // ); // نعمل Route للصفحة الجديدة
                     },
                   ),
                 ],

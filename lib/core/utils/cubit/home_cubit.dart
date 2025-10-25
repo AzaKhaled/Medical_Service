@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:medical_service_app/core/models/appointment_model.dart';
 import 'package:medical_service_app/core/models/category_model.dart';
 import 'package:medical_service_app/core/models/doctor_model.dart';
 import 'package:medical_service_app/core/models/user_model.dart';
@@ -13,6 +14,8 @@ import 'package:medical_service_app/features/home/presentation/views/widgets/hom
 import 'package:medical_service_app/features/home/presentation/views/widgets/settting_view.dart';
 import 'package:medical_service_app/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 HomeCubit get homeCubit => HomeCubit.get(navigatorKey.currentContext!);
 
@@ -57,7 +60,7 @@ class HomeCubit extends Cubit<HomeStates> {
       }
     } catch (e) {
       // debugPrint(" Error logging in: $e");
-      emit(HomeLoginErrorState(e.toString()));
+      emit(HomeLoginErrorState("Login failed"));
     }
   }
 
@@ -81,8 +84,6 @@ class HomeCubit extends Cubit<HomeStates> {
 
       if (response.user != null) {
         // debugPrint("✅ Signup succeeded!");
-
-        // ✅ شيل الـ saveUserToTable خالص - الـ trigger هيعملها
 
         signUpNameController.clear();
         signUpEmailController.clear();
@@ -349,6 +350,7 @@ class HomeCubit extends Cubit<HomeStates> {
           .order('created_at', ascending: false);
 
       emit(HomeGetReviewsSuccessState(newReviews));
+      getDoctorById(doctorId);
     } catch (e) {
       // debugPrint("❌ Error adding/updating review: $e");
       emit(HomeAddReviewErrorState(e.toString()));
@@ -409,75 +411,100 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
-  Future<void> bookAppointment({
-    required String doctorId,
-    required DateTime appointmentDate,
-    required String appointmentTime,
-  }) async {
-    final supabase = Supabase.instance.client;
+ String? lastCreatedAppointmentId;
 
-    try {
-      final user = supabase.auth.currentUser!;
-      final userId = user.id;
-      debugPrint("🔑 Booking for userId: $userId");
+Future<String> bookAppointment({
+  required String doctorId,
+  required DateTime appointmentDate,
+  required String appointmentTime,
+}) async {
+  final supabase = Supabase.instance.client;
 
-      final dateStr = appointmentDate.toIso8601String().split('T')[0];
+  try {
+    final user = supabase.auth.currentUser!;
+    final userId = user.id;
+    debugPrint("🔑 Booking for userId: $userId");
 
-      // تحقق إذا الموعد محجوز لنفس الدكتور
-      final existing = await supabase
-          .from('appointments')
-          .select()
-          .eq('doctor_id', doctorId)
-          .eq('appointment_date', dateStr)
-          .eq('appointment_time', appointmentTime)
-          .maybeSingle();
+    final dateStr = appointmentDate.toIso8601String().split('T')[0];
 
-      if (existing != null) {
-        debugPrint("❌ هذا الموعد محجوز بالفعل");
-        throw Exception("هذا الموعد محجوز بالفعل");
-      }
+    // تحقق إذا الموعد محجوز لنفس الدكتور
+    final existing = await supabase
+        .from('appointments')
+        .select()
+        .eq('doctor_id', doctorId)
+        .eq('appointment_date', dateStr)
+        .eq('appointment_time', appointmentTime)
+        .maybeSingle();
 
-      // تحقق إذا المستخدم نفسه حجز نفس الموعد
-      final userExisting = await supabase
-          .from('appointments')
-          .select()
-          .eq('user_id', userId)
-          .eq('appointment_date', dateStr)
-          .eq('appointment_time', appointmentTime)
-          .maybeSingle();
+    if (existing != null) {
+      throw Exception("❌ هذا الموعد محجوز بالفعل");
+    }
 
-      if (userExisting != null) {
-        debugPrint("❌ أنت حجزت هذا الموعد بالفعل");
-        throw Exception("You have already booked this appointment");
-      }
+    // تحقق إذا المستخدم نفسه حجز نفس الموعد
+    final userExisting = await supabase
+        .from('appointments')
+        .select()
+        .eq('user_id', userId)
+        .eq('appointment_date', dateStr)
+        .eq('appointment_time', appointmentTime)
+        .maybeSingle();
 
-      // إضافة الموعد
-      try {
-        final response = await supabase
-            .from('appointments')
-            .insert({
-              'doctor_id': doctorId,
-              'user_id': userId,
-              'appointment_date': dateStr,
-              'appointment_time': appointmentTime,
-              'status': 'pending',
-            })
-            .select()
-            .single();
-        debugPrint("✅ تم حجز الموعد بنجاح: $response");
-      } catch (e) {
-        // لو الـ DB رمى duplicate key (23505)
-        if (e is PostgrestException && e.code == '23505') {
-          throw Exception(
-            "This appointment is already booked for another user.",
-          );
-        } else {
-          rethrow;
-        }
-      }
-    } catch (e) {
-      debugPrint("❌ خطأ في الحجز: $e");
+    if (userExisting != null) {
+      throw Exception("❌ لقد حجزت هذا الموعد بالفعل");
+    }
+
+    // 🟢 إضافة الموعد
+    final response = await supabase
+        .from('appointments')
+        .insert({
+          'doctor_id': doctorId,
+          'user_id': userId,
+          'appointment_date': dateStr,
+          'appointment_time': appointmentTime,
+          'status': 'pending',
+        })
+        .select('id') // ✅ هنا هنرجع الـ ID بس
+        .single();
+
+    final appointmentId = response['id'] as String;
+    lastCreatedAppointmentId = appointmentId;
+
+    debugPrint("✅ تم حجز الموعد بنجاح: ID = $appointmentId");
+
+    return appointmentId;
+  } on PostgrestException catch (e) {
+    if (e.code == '23505') {
+      throw Exception("This appointment is already booked for another user.");
+    } else {
       rethrow;
+    }
+  } catch (e) {
+    debugPrint("❌ خطأ في الحجز: $e");
+    rethrow;
+  }
+}
+
+  Future<List<AppointmentModel>> getAppointmentsByDoctorId(
+    String doctorId,
+  ) async {
+    emit(HomeGetAppointmentsLoadingState());
+    try {
+      final response = await supabase
+          .from('appointments')
+          .select()
+          .eq('doctor_id', doctorId);
+
+      final List data = response as List;
+      final appointments = data
+          .map((e) => AppointmentModel.fromJson(e as Map<String, Object?>))
+          .toList();
+
+      emit(HomeGetAppointmentsSuccessState(appointments));
+      return appointments;
+    } catch (e) {
+      emit(HomeGetAppointmentsErrorState(e.toString()));
+      debugPrint("❌ Error fetching appointments: $e");
+      return [];
     }
   }
 
@@ -652,6 +679,104 @@ class HomeCubit extends Cubit<HomeStates> {
     notifications[index]['isRead'] = true;
     emit(HomeNotificationsUpdatedState()); // اعملي State لتحديث الـ UI
   }
+
+  // Future<String> generatePayMobPaymentKey({
+  //   required int amount,
+  //   required String doctorId,
+  //   required DateTime appointmentDate,
+  //   required String appointmentTime,
+  // }) async {
+  //   try {
+  //     const String apiKey =
+  //         "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBMk9EVTNNQ3dpYm1GdFpTSTZJbWx1YVhScFlXd2lmUS43d3k2UW5xUXRZT3p4b1JiZWhPVVdldkNPNHI4N21ELUhUNjNuNTRCczhmT1NXMjFMVDFVeFgyTkdYVG94eW9FWnZBTGJ0blJkaGVEeFVlMHZhQW51dw==";
+  //     const int integrationId = 5370772; // Integration ID الجديد
+
+  //     // 1️⃣ احصلي على Auth Token
+  //     final authResp = await http.post(
+  //       Uri.parse("https://accept.paymob.com/api/auth/tokens"),
+  //       headers: {"Content-Type": "application/json"},
+  //       body: jsonEncode({"api_key": apiKey}),
+  //     );
+  //     final authData = jsonDecode(authResp.body);
+  //     final authToken = authData["token"];
+  //     if (authToken == null) {
+  //       throw Exception("Auth token not received. Check your API key!");
+  //     }
+
+  //     // 2️⃣ جلب بيانات المستخدم من Supabase
+  //     final user = supabase.auth.currentUser!;
+  //     final userData = await supabase
+  //         .from('users')
+  //         .select()
+  //         .eq('auth_id', user.id)
+  //         .maybeSingle();
+
+  //     final firstName = userData?['name']?.split(' ').first ?? "Customer";
+  //     final lastName = userData?['name']?.split(' ').last ?? "";
+  //     final email = userData?['email'] ?? user.email ?? "customer@example.com";
+  //     final phone = userData?['phone'] ?? "+201234567890";
+  //     final city = userData?['city'] ?? "Cairo";
+  //     final country = userData?['country'] ?? "EG";
+
+  //     // 3️⃣ إنشاء Order
+  //     final orderResp = await http.post(
+  //       Uri.parse("https://accept.paymob.com/api/ecommerce/orders"),
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": "Bearer $authToken",
+  //       },
+  //       body: jsonEncode({
+  //         "amount_cents": amount,
+  //         "currency": "EGP",
+  //         "items": [
+  //           {"name": "Appointment Fee", "amount_cents": amount, "quantity": 1},
+  //         ],
+  //       }),
+  //     );
+  //     final orderData = jsonDecode(orderResp.body);
+  //     final orderId = orderData["id"];
+  //     if (orderId == null) {
+  //       throw Exception("Order ID not received!");
+  //     }
+
+  //     // 4️⃣ توليد Payment Key باستخدام بيانات المستخدم الحقيقية
+  //     final paymentKeyResp = await http.post(
+  //       Uri.parse("https://accept.paymob.com/api/acceptance/payment_keys"),
+  //       headers: {"Content-Type": "application/json"},
+  //       body: jsonEncode({
+  //         "amount_cents": amount,
+  //         "currency": "EGP",
+  //         "order_id": orderId,
+  //         "billing_data": {
+  //           "apartment": "NA",
+  //           "email": email,
+  //           "first_name": firstName,
+  //           "last_name": lastName,
+  //           "street": "NA",
+  //           "city": city,
+  //           "country": country,
+  //           "phone_number": phone,
+  //         },
+  //         "integration_id": integrationId,
+  //       }),
+  //     );
+
+  //     final paymentKeyData = jsonDecode(paymentKeyResp.body);
+  //     final paymentToken = paymentKeyData["token"];
+  //     if (paymentToken == null) {
+  //       throw Exception(
+  //         "Payment Key not received. Check integrationId and authToken!",
+  //       );
+  //     }
+
+  //     debugPrint("✅ Payment Key generated successfully: $paymentToken");
+  //     return paymentToken;
+  //   } catch (e, stackTrace) {
+  //     debugPrint("❌ Error generating PayMob Payment Key: $e");
+  //     print(stackTrace);
+  //     rethrow;
+  //   }
+  // }
 
   Future<void> signOut(BuildContext context) async {
     await Supabase.instance.client.auth.signOut().then((value) {
