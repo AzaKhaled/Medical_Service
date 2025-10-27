@@ -139,7 +139,6 @@ class _MedicalServiceState extends State<MedicalService> {
 
     if (initialUri != null && initialUri.host == 'reset-password') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // ✅ استخدمي Future.microtask لتأخير التنفيذ بعد بناء الواجهة
         Future.microtask(() {
           navigatorKey.currentState?.pushReplacement(
             MaterialPageRoute(builder: (_) => const ResetPasswordView()),

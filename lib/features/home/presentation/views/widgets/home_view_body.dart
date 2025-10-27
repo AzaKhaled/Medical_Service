@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/doctors_list_builder.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/header_section.dart';
@@ -20,13 +21,13 @@ class _HomeViewBodyState extends State<HomeViewBody> {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return  Column(
       children: [
-        HeaderSection(),
-        SizedBox(height: 10),
-        ServicesView(),
-        SizedBox(height: 10),
-        DoctorsListBuilder(),
+       const HeaderSection(),
+        SizedBox(height: 10.h),
+       const ServicesView(),
+        SizedBox(height: 10.h),
+       const DoctorsListBuilder(),
       ],
     );
   }

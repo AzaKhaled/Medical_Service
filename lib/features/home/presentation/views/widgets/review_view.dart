@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
@@ -118,7 +119,7 @@ class _ReviewViewState extends State<ReviewView> {
                     });
                   },
                 ),
-                const SizedBox(height: 12),
+                 SizedBox(height: 12.h),
 
                 Row(
                   children: [
@@ -143,7 +144,7 @@ class _ReviewViewState extends State<ReviewView> {
                         color: Colors.blue,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                     SizedBox(width: 12.w),
                     Expanded(
                       child: CustomSearch(
                         controller: commentController,
@@ -151,7 +152,7 @@ class _ReviewViewState extends State<ReviewView> {
                         hintText: 'Write your review...',
                       ),
                     ),
-                    const SizedBox(width: 12),
+                     SizedBox(width: 12.w),
                     CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.grey[200],

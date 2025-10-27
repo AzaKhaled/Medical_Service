@@ -56,15 +56,16 @@ class _PaymentViewState extends State<PaymentView> {
                     userId: userId,
                     doctorId: doctorId,
                     appointmentId: appointmentId,
-                    amount: amount is int
-                        ? amount
+                    amount: (amount is num)
+                        ? amount.toInt()
                         : int.tryParse(amount.toString()) ?? 0,
+
                     status: "paid",
                   );
                 }
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('✅ تم الدفع بنجاح')),
+                    const SnackBar(content: Text('payment successful')),
                   );
                   Navigator.pop(context, true);
                 }
@@ -87,7 +88,7 @@ class _PaymentViewState extends State<PaymentView> {
                 }
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('❌ فشل الدفع')),
+                    const SnackBar(content: Text('payment failed or declined')),
                   );
                   Navigator.pop(context, false);
                 }
@@ -141,7 +142,7 @@ class _PaymentViewState extends State<PaymentView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الدفع الإلكتروني'),
+        title: const Text('Payment'),
         centerTitle: true,
       ),
       body: args == null

@@ -48,7 +48,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
 
       // ✅ لو التطبيق مفتوح واتفتح بلينك جديد
       _appLinks.uriLinkStream.listen((uri) {
-        if (uri != null && uri.queryParameters['type'] == 'recovery') {
+        if (uri.queryParameters['type'] == 'recovery') {
           setState(() {
             _isResetMode = true;
           });

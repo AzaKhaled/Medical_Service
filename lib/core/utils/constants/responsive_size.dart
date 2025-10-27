@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 extension SizerExt on num {
   static final _screenSizes = ScreenSizes();
 
-  double get w => _screenSizes.getWidth(this);
-  double get h => _screenSizes.getHeight(this);
+  double get ww => _screenSizes.getWidth(this);
+  double get hh => _screenSizes.getHeight(this);
   double get rw => _screenSizes.getRelativeWidth(this);
   double get rh => _screenSizes.getRelativeHeight(this);
   double get rSp => _screenSizes.getRelativeSize(this);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/models/doctor_model.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/constants/routes.dart';
@@ -106,7 +107,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -132,13 +133,13 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
 
             Text(
               doctor.specialtyName ?? "Unknown Specialty",
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -168,26 +169,23 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     value: reviewsCount.toString(),
                     label: "Reviews",
                   ),
-                 onTap: () async {
-    context.push(
-    Routes.reviewRoute,
-    arguments: doctor.id.toString(),
-  );
-
-},
-
-
+                  onTap: () async {
+                    context.push(
+                      Routes.reviewRoute,
+                      arguments: doctor.id.toString(),
+                    );
+                  },
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // About me
             const Text(
               "About Me",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
 
             // نص الـ about me + read more
             GestureDetector(
@@ -216,7 +214,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                 child: Text(isExpanded ? "Read Less" : "Read More"),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             SizedBox(
               width: double.infinity,
@@ -227,8 +225,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     arguments: doctor.id.toString(),
                   );
                 },
-                
-                
+
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(

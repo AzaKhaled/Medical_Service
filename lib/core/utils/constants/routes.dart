@@ -28,8 +28,8 @@ class Routes {
   static Map<String, WidgetBuilder> get routes => {
     homeRoute: (context) => const HomeView(),
     favoriteRoute: (context) => const FavoriteView(),
-    loginRoute: (context) => LoginScreen(),
-    signupRoute: (context) => SignupScreen(),
+    loginRoute: (context) => const LoginScreen(),
+    signupRoute: (context) => const SignupScreen(),
     notificationsRoute: (context) => const NotificationsView(),
     appointmentsRoute: (context) => const AppointmentView(),
     settingsRoute: (context) => const SettingsView(),

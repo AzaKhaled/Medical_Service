@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ReviewItem extends StatelessWidget {
   final String userName;
@@ -55,7 +56,7 @@ class ReviewItem extends StatelessWidget {
                 ? const Icon(Icons.person, size: 30, color: Colors.grey)
                 : null,
           ),
-          const SizedBox(width: 16),
+           SizedBox(width: 16.w),
 
           // 📝 بيانات الريفيو
           Expanded(

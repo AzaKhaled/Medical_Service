@@ -14,8 +14,6 @@ import 'package:medical_service_app/features/home/presentation/views/widgets/hom
 import 'package:medical_service_app/features/home/presentation/views/widgets/settting_view.dart';
 import 'package:medical_service_app/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 HomeCubit get homeCubit => HomeCubit.get(navigatorKey.currentContext!);
 
@@ -411,78 +409,79 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
- String? lastCreatedAppointmentId;
+  String? lastCreatedAppointmentId;
 
-Future<String> bookAppointment({
-  required String doctorId,
-  required DateTime appointmentDate,
-  required String appointmentTime,
-}) async {
-  final supabase = Supabase.instance.client;
+  Future<String> bookAppointment({
+    required String doctorId,
+    required DateTime appointmentDate,
+    required String appointmentTime,
+  }) async {
+    final supabase = Supabase.instance.client;
 
-  try {
-    final user = supabase.auth.currentUser!;
-    final userId = user.id;
-    debugPrint("🔑 Booking for userId: $userId");
+    try {
+      final user = supabase.auth.currentUser!;
+      final userId = user.id;
+      debugPrint("🔑 Booking for userId: $userId");
 
-    final dateStr = appointmentDate.toIso8601String().split('T')[0];
+      final dateStr = appointmentDate.toIso8601String().split('T')[0];
 
-    // تحقق إذا الموعد محجوز لنفس الدكتور
-    final existing = await supabase
-        .from('appointments')
-        .select()
-        .eq('doctor_id', doctorId)
-        .eq('appointment_date', dateStr)
-        .eq('appointment_time', appointmentTime)
-        .maybeSingle();
+      // تحقق إذا الموعد محجوز لنفس الدكتور
+      final existing = await supabase
+          .from('appointments')
+          .select()
+          .eq('doctor_id', doctorId)
+          .eq('appointment_date', dateStr)
+          .eq('appointment_time', appointmentTime)
+          .maybeSingle();
 
-    if (existing != null) {
-      throw Exception("❌ هذا الموعد محجوز بالفعل");
-    }
+      if (existing != null) {
+        throw Exception(" You have already booked this appointment.   ");
+      }
 
-    // تحقق إذا المستخدم نفسه حجز نفس الموعد
-    final userExisting = await supabase
-        .from('appointments')
-        .select()
-        .eq('user_id', userId)
-        .eq('appointment_date', dateStr)
-        .eq('appointment_time', appointmentTime)
-        .maybeSingle();
+      // تحقق إذا المستخدم نفسه حجز نفس الموعد
+      final userExisting = await supabase
+          .from('appointments')
+          .select()
+          .eq('user_id', userId)
+          .eq('appointment_date', dateStr)
+          .eq('appointment_time', appointmentTime)
+          .maybeSingle();
 
-    if (userExisting != null) {
-      throw Exception("❌ لقد حجزت هذا الموعد بالفعل");
-    }
+      if (userExisting != null) {
+        throw Exception("You have already booked this appointment.");
+      }
 
-    // 🟢 إضافة الموعد
-    final response = await supabase
-        .from('appointments')
-        .insert({
-          'doctor_id': doctorId,
-          'user_id': userId,
-          'appointment_date': dateStr,
-          'appointment_time': appointmentTime,
-          'status': 'pending',
-        })
-        .select('id') // ✅ هنا هنرجع الـ ID بس
-        .single();
+      // 🟢 إضافة الموعد
+      final response = await supabase
+          .from('appointments')
+          .insert({
+            'doctor_id': doctorId,
+            'user_id': userId,
+            'appointment_date': dateStr,
+            'appointment_time': appointmentTime,
+            'status': 'pending',
+          })
+          .select('id') // ✅ هنا هنرجع الـ ID بس
+          .single();
+      // 🧮 تحديث عدد المرضى في جدول doctors
 
-    final appointmentId = response['id'] as String;
-    lastCreatedAppointmentId = appointmentId;
+      final appointmentId = response['id'] as String;
+      lastCreatedAppointmentId = appointmentId;
 
-    debugPrint("✅ تم حجز الموعد بنجاح: ID = $appointmentId");
+      debugPrint("✅ تم حجز الموعد بنجاح: ID = $appointmentId");
 
-    return appointmentId;
-  } on PostgrestException catch (e) {
-    if (e.code == '23505') {
-      throw Exception("This appointment is already booked for another user.");
-    } else {
+      return appointmentId;
+    } on PostgrestException catch (e) {
+      if (e.code == '23505') {
+        throw Exception("This appointment is already booked for another user.");
+      } else {
+        rethrow;
+      }
+    } catch (e) {
+      debugPrint("❌ خطأ في الحجز: $e");
       rethrow;
     }
-  } catch (e) {
-    debugPrint("❌ خطأ في الحجز: $e");
-    rethrow;
   }
-}
 
   Future<List<AppointmentModel>> getAppointmentsByDoctorId(
     String doctorId,

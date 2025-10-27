@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class DoctorShimmerLoading extends StatelessWidget {
-  const DoctorShimmerLoading();
+  const DoctorShimmerLoading({super.key});
 
   @override
   Widget build(BuildContext context) {

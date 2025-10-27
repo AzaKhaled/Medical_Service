@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsTile extends StatelessWidget {
   final IconData icon;
@@ -38,7 +39,7 @@ class SettingsTile extends StatelessWidget {
         child: Row(
           children: [
             Icon(icon, color: iconColor),
-            const SizedBox(width: 14),
+             SizedBox(width: 14.w),
             Expanded(
               child: Text(
                 title,

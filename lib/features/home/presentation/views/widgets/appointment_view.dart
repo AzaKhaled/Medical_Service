@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/service/paymob_service.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/constants/routes.dart';
@@ -44,7 +45,9 @@ class _AppointmentViewState extends State<AppointmentView> {
   Future<void> _fetchBookedTimesForDay(int dayIndex) async {
     if (doctorId == null) return;
 
-    final allAppointments = await homeCubit.getAppointmentsByDoctorId(doctorId!);
+    final allAppointments = await homeCubit.getAppointmentsByDoctorId(
+      doctorId!,
+    );
 
     final now = DateTime.now();
     final selectedDate = now.add(
@@ -125,8 +128,8 @@ class _AppointmentViewState extends State<AppointmentView> {
       body: isLoading
           ? const DoctorShimmerLoading()
           : doctorData == null
-              ? const Center(child: Text('Doctor not found'))
-              : _buildAppointmentBody(),
+          ? const Center(child: Text('Doctor not found'))
+          : _buildAppointmentBody(),
     );
   }
 
@@ -162,9 +165,9 @@ class _AppointmentViewState extends State<AppointmentView> {
                 backgroundImage: imageUrl.isNotEmpty
                     ? NetworkImage(imageUrl)
                     : const AssetImage("assets/images/doctor.jfif")
-                        as ImageProvider,
+                          as ImageProvider,
               ),
-              const SizedBox(width: 16),
+               SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +179,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                     SizedBox(height: 4.h),
                     Text(
                       specialty,
                       style: const TextStyle(
@@ -236,7 +239,7 @@ class _AppointmentViewState extends State<AppointmentView> {
           ),
         ),
 
-        const SizedBox(height: 20),
+         SizedBox(height: 20.h),
 
         // Time slots
         Expanded(
@@ -267,8 +270,8 @@ class _AppointmentViewState extends State<AppointmentView> {
                       color: isBooked
                           ? Colors.grey.shade300
                           : (isSelected
-                              ? AppColors.primaryColor
-                              : Colors.white),
+                                ? AppColors.primaryColor
+                                : Colors.white),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
@@ -350,8 +353,8 @@ class _AppointmentViewState extends State<AppointmentView> {
                         if (mounted) {
                           debugPrint("❌ Error: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("حدث خطأ: $e"),
+                          const  SnackBar(
+                              content: Text("Error booking appointment"),
                               backgroundColor: Colors.red,
                             ),
                           );

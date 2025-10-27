@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
@@ -101,7 +102,7 @@ class _ChangeProfileImageViewState extends State<ChangeProfileImageView> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                 SizedBox(height: 24.h),
                 const Text(
                   'Tap the camera icon to select a new profile image',
                   style: TextStyle(color: Colors.grey, fontSize: 14),

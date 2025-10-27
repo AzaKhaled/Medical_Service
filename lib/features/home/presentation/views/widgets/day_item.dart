@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/theme/colors.dart';
 
 class DayItem extends StatelessWidget {
@@ -37,7 +38,7 @@ class DayItem extends StatelessWidget {
               color: isSelected ? Colors.white : Colors.black,
             ),
           ),
-          const SizedBox(height: 4),
+           SizedBox(height: 4.h),
           Text(
             date,
             style: TextStyle(color: isSelected ? Colors.white : Colors.black),
