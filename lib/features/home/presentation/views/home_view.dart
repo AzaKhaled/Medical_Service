@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 
@@ -17,7 +18,9 @@ class HomeView extends StatelessWidget {
             currentIndex: homeCubit.currentIndex,
             onTap: (index) {
               homeCubit.currentIndex = index;
+           
             },
+             selectedItemColor: AppColors.primaryColor,
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),

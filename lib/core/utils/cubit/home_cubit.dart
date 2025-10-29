@@ -501,7 +501,7 @@ class HomeCubit extends Cubit<HomeStates> {
       emit(HomeGetAppointmentsSuccessState(appointments));
       return appointments;
     } catch (e) {
-      emit(HomeGetAppointmentsErrorState(e.toString()));
+      emit(HomeGetAppointmentsErrorState('Failed to fetch appointments'));
       debugPrint("❌ Error fetching appointments: $e");
       return [];
     }

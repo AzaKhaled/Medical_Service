@@ -167,7 +167,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                     : const AssetImage("assets/images/doctor.jfif")
                           as ImageProvider,
               ),
-               SizedBox(width: 16.w),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,7 +179,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                     SizedBox(height: 4.h),
+                    SizedBox(height: 4.h),
                     Text(
                       specialty,
                       style: const TextStyle(
@@ -239,7 +239,7 @@ class _AppointmentViewState extends State<AppointmentView> {
           ),
         ),
 
-         SizedBox(height: 20.h),
+        SizedBox(height: 20.h),
 
         // Time slots
         Expanded(
@@ -353,12 +353,19 @@ class _AppointmentViewState extends State<AppointmentView> {
                         if (mounted) {
                           debugPrint("❌ Error: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                          const  SnackBar(
-                              content: Text("Error booking appointment"),
+                            SnackBar(
+                              content: Text(
+                                e.toString().replaceAll(
+                                  'Exception: ',
+                                  '',
+                                ), // 🔥 يطبع الرسالة فقط
+                                style: const TextStyle(color: Colors.white),
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );
                         }
+                        return;
                       }
                     }
                   : null,

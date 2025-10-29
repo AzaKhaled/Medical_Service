@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/models/doctor_model.dart';
@@ -17,15 +18,33 @@ class DoctorDetailsView extends StatefulWidget {
 
 class _DoctorDetailsViewState extends State<DoctorDetailsView> {
   bool isExpanded = false;
+  bool isGlowing = false; // 👈 حالة الوميض
   int reviewsCount = 0;
   late DoctorModel doctor;
+  late final Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 👇 وميض كل ثانية
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      setState(() {
+        isGlowing = !isGlowing;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    doctor =
-        context.getArg()
-            as DoctorModel; // ✅ نحصل على الـ DoctorModel من الـ arguments
+    doctor = context.getArg() as DoctorModel;
     fetchReviewsCount();
   }
 
@@ -60,8 +79,7 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child:
-                      (doctor.imageUrl != null &&
+                  child: (doctor.imageUrl != null &&
                           doctor.imageUrl.toString().isNotEmpty)
                       ? Image.network(
                           doctor.imageUrl!,
@@ -70,11 +88,11 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               Image.asset(
-                                "assets/images/doctor.jfif",
-                                height: 220,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
+                            "assets/images/doctor.jfif",
+                            height: 220,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
                         )
                       : Image.asset(
                           "assets/images/doctor.jfif",
@@ -83,7 +101,6 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                           fit: BoxFit.cover,
                         ),
                 ),
-
                 Positioned(
                   top: 12,
                   right: 12,
@@ -125,8 +142,8 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     const SizedBox(width: 4),
                     Text(
                       double.tryParse(
-                            doctor.rating?.toString() ?? "0",
-                          )?.toStringAsFixed(1) ??
+                                doctor.rating?.toString() ?? "0",
+                              )?.toStringAsFixed(1) ??
                           "0.0",
                     ),
                   ],
@@ -156,38 +173,59 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                 ),
                 InfoCard(
                   icon: Icons.star,
-                  value:
-                      double.tryParse(
-                        doctor.rating?.toString() ?? "0",
-                      )?.toStringAsFixed(1) ??
+                  value: double.tryParse(
+                            doctor.rating?.toString() ?? "0",
+                          )?.toStringAsFixed(1) ??
                       "0.0",
                   label: "Rating",
                 ),
+
+                // 🔥 الأيقونة اللي بتنور وتطفي
                 GestureDetector(
-                  child: InfoCard(
-                    icon: Icons.message,
-                    value: reviewsCount.toString(),
-                    label: "Reviews",
-                  ),
                   onTap: () async {
                     context.push(
                       Routes.reviewRoute,
                       arguments: doctor.id.toString(),
                     );
                   },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 500),
+                        transitionBuilder: (child, anim) =>
+                            ScaleTransition(scale: anim, child: child),
+                        child: Icon(
+                          Icons.message,
+                          key: ValueKey(isGlowing),
+                          color: isGlowing
+                              ? AppColors.primaryColor // 💡 بينور
+                              : Colors.grey, // 💡 بيطفي
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        reviewsCount.toString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const Text(
+                        "Reviews",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             SizedBox(height: 24.h),
 
-            // About me
             const Text(
               "About Me",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8.h),
 
-            // نص الـ about me + read more
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -197,9 +235,8 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
               child: Text(
                 doctor.bio ?? "No bio available",
                 maxLines: isExpanded ? null : 2,
-                overflow: isExpanded
-                    ? TextOverflow.visible
-                    : TextOverflow.ellipsis,
+                overflow:
+                    isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
             ),
@@ -211,7 +248,10 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     isExpanded = !isExpanded;
                   });
                 },
-                child: Text(isExpanded ? "Read Less" : "Read More"),
+                child: Text(
+                  isExpanded ? "Read Less" : "Read More",
+                  style: const TextStyle(color: AppColors.primaryColor),
+                ),
               ),
             ),
             SizedBox(height: 24.h),
@@ -225,7 +265,6 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
                     arguments: doctor.id.toString(),
                   );
                 },
-
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -245,24 +284,3 @@ class _DoctorDetailsViewState extends State<DoctorDetailsView> {
     );
   }
 }
-
-
-
-
-
-
-// if (refresh == true) {
-  //   if (!context.mounted) return;
-
-  //   final updatedDoctor = await context
-  //       .read<HomeCubit>()
-  //       .getDoctorById(doctor.id.toString());
-
-  //   if (updatedDoctor != null) {
-  //     setState(() {
-  //       doctor.rating = updatedDoctor.rating;
-  //     });
-  //   }
-
-  //   fetchReviewsCount();
-  // }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medical_service_app/core/theme/colors.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -165,7 +166,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _changePassword,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
+                    backgroundColor:AppColors.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

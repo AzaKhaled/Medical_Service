@@ -69,40 +69,25 @@ class _HeaderSectionState extends State<HeaderSection> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          spreadRadius: 1,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Colors.white,
-                      backgroundImage: _isValidImageUrl(userData.imageUrl)
-                          ? NetworkImage(userData.imageUrl!)
-                          : null,
-                      onBackgroundImageError:
-                          _isValidImageUrl(userData.imageUrl)
-                          ? (_, _) {
-                              debugPrint(
-                                'Error loading image: ${userData.imageUrl}',
-                              );
-                            }
-                          : null,
-                      child: !_isValidImageUrl(userData.imageUrl)
-                          ? const Icon(
-                              Icons.person,
-                              color: AppColors.primaryColor,
-                            )
-                          : null,
-                    ),
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: Colors.white,
+                    backgroundImage: _isValidImageUrl(userData.imageUrl)
+                        ? NetworkImage(userData.imageUrl!)
+                        : null,
+                    onBackgroundImageError: _isValidImageUrl(userData.imageUrl)
+                        ? (_, _) {
+                            debugPrint(
+                              'Error loading image: ${userData.imageUrl}',
+                            );
+                          }
+                        : null,
+                    child: !_isValidImageUrl(userData.imageUrl)
+                        ? const Icon(
+                            Icons.person,
+                            color: AppColors.primaryColor,
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 8),
                   IconButton(

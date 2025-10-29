@@ -33,7 +33,7 @@ class NotificationsView extends StatelessWidget {
           }
 
           if (notifications.isEmpty) {
-            return const Center(child: Text('لا توجد إشعارات حالياً'));
+            return const Center(child: Text('No notifications found.'));
           }
 
           return RefreshIndicator(
