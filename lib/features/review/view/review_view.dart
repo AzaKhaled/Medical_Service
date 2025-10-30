@@ -6,8 +6,8 @@ import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/custom_search.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/review_item.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/review_shimmer.dart';
+import 'package:medical_service_app/features/review/view/widget/review_item.dart';
+import 'package:medical_service_app/features/review/view/widget/review_shimmer.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ReviewView extends StatefulWidget {

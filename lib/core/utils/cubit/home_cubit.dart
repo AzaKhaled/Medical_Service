@@ -9,9 +9,9 @@ import 'package:medical_service_app/core/models/category_model.dart';
 import 'package:medical_service_app/core/models/doctor_model.dart';
 import 'package:medical_service_app/core/models/user_model.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_view.dart';
+import 'package:medical_service_app/features/favorite/view/favorite_view.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/home_view_body.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/settting_view.dart';
+import 'package:medical_service_app/features/setting/views/settting_view.dart';
 import 'package:medical_service_app/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

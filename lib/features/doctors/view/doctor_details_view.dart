@@ -7,7 +7,7 @@ import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/info_icons.dart';
+import 'package:medical_service_app/features/doctors/view/widgets/info_icons.dart';
 
 class DoctorDetailsView extends StatefulWidget {
   const DoctorDetailsView({super.key});

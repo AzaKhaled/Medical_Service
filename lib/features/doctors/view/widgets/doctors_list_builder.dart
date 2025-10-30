@@ -5,8 +5,8 @@ import 'package:medical_service_app/core/utils/constants/routes.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/home_state.dart';
 import 'package:medical_service_app/core/utils/extensions/context_extension.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/doctor_similar.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/doctorcard.dart';
+import 'package:medical_service_app/features/doctors/view/widgets/doctor_similar.dart';
+import 'package:medical_service_app/features/doctors/view/widgets/doctorcard.dart';
 
 class DoctorsListBuilder extends StatefulWidget {
   const DoctorsListBuilder({super.key});

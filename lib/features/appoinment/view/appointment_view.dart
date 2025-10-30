@@ -8,7 +8,7 @@ import 'package:medical_service_app/core/utils/extensions/context_extension.dart
 import 'package:medical_service_app/core/models/doctor_model.dart';
 import 'package:medical_service_app/core/models/appointment_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/appointment_shimmer.dart';
+import 'package:medical_service_app/features/appoinment/view/widgets/appointment_shimmer.dart';
 
 class AppointmentView extends StatefulWidget {
   const AppointmentView({super.key});

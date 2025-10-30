@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_cubit.dart';
 import 'package:medical_service_app/core/utils/cubit/favorite_state.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/favorite_shimmer.dart';
+import 'package:medical_service_app/features/favorite/view/widget/favorite_shimmer.dart';
 
 class FavoriteView extends StatefulWidget {
   const FavoriteView({super.key});

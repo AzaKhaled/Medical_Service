@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medical_service_app/core/utils/cubit/home_cubit.dart';
-import 'package:medical_service_app/features/home/presentation/views/widgets/doctors_list_builder.dart';
+import 'package:medical_service_app/features/doctors/view/widgets/doctors_list_builder.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/header_section.dart';
 import 'package:medical_service_app/features/home/presentation/views/widgets/services_view.dart';
 
