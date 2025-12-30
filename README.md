@@ -1,8 +1,6 @@
 # 🩺 Medical Service App
 
-![Home](assets/images/home.jpeg)
-![Appointment](assets/images/appointment.jpeg)
-![Details](assets/images/details.jpeg)
+
 ---
 
 <p align="center">
@@ -37,9 +35,9 @@
 
 > Replace these placeholders with real screenshots from `screenshots/` or `assets/`.
 
-|                 Login                  |                 Home                 |                 Chat                 |
-|:--------------------------------------:|:------------------------------------:|:------------------------------------:|
-| ![Login](assets/screenshots/login.jpg) | ![Home](assets/screenshots/home.jpg) | ![Chat](assets/screenshots/chat.jpg) |
+|               Home                     |              appointment                       |                Details               |
+|:--------------------------------------:|:----------------------------------------------:|:------------------------------------:|
+| ![Home](assets/images/home.jpeg)       | ![appointment](assets/images/appointment.jpeg) | ![Details](assets/images/details.jpeg) |
 
 ---
 
