@@ -17,16 +17,14 @@
 
 ## 🔑 Highlights
 
--✅Doctor Appointment Booking  
-  Browse doctors by specialty, location, or rating, and book appointments instantly.
-
+- ✅ Doctor Appointment Booking  
 - ✅ Secure Online Payments (Paymob)
-- ✅Real-Time Notifications
-- ✅Reviews & Ratings System
-- ✅Smart Search (Location + Specialties)
-- ✅User Profiles & Records  
-- ✅Clean & Intuitive UI (Flutter)  
-- ✅Secure & Scalable Architecture  
+- ✅ Real-Time Notifications
+- ✅ Reviews & Ratings System
+- ✅ Smart Search (Location + Specialties)
+- ✅ User Profiles & Records  
+- ✅ Clean & Intuitive UI (Flutter)  
+- ✅ Secure & Scalable Architecture  
 
 
 ---
