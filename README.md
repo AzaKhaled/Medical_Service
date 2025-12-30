@@ -116,14 +116,6 @@ Consider adding mocks for Firestore and Auth when writing unit tests.
 
 ---
 
-## 📌 Pinned Chats & UX Notes
-
-- Pinned chats should be stored as a boolean/priority in Firestore (`pinned: true` or
-  `pinnedAt: timestamp`).
-- Sort chats locally by `pinned` then `lastMessage.timestamp` to always surface pinned chats at top.
-
----
-
 ## 🛠️ Common commands
 
 ```bash
