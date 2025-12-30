@@ -4,7 +4,7 @@
 ---
 
 <p align="center">
-  <img src="assets/images/logo.png" alt="Medical Service Logo" width="400" />
+  <img src="assets/images/icon.jfif" alt="Medical Service Logo" width="400" />
 </p>
 
 **Medical Service** is a modern mobile application built with Flutter that provides users with seamless medical service features — from booking appointments to checking health records and accessing medical info.
