@@ -73,11 +73,14 @@ This layout helps keep features self-contained and easier to test.
 
 ## 🎯 Design & UX Decisions
 
-- **Colors & Theming** — centralized in `ColorsManager` (supports Light & Dark).
-- **Chat Bubbles** — designed for legibility and accessibility. Sender bubble uses primary brand
-  color; receiver uses soft neutral tones.
-- **Performance** — image caching, limited list item rebuilds, stream-based updates to minimize UI
-  thrash.
+- **Colors & Theming** — centralized in `ColorsManager` to support both Light & Dark themes. Colors chosen for clarity, calmness, and accessibility in a medical context.
+- **Home & Appointment Layouts** — clean and minimalistic design to make navigation intuitive. Key actions (booking, viewing details) are easily accessible.
+- **Doctor & Appointment Cards** — designed for readability and quick scanning. Includes profile picture, specialty, rating, and available slots.
+- **Navigation** — bottom navigation bar with clear icons for Home, Appointments, Profile, and Payments.
+- **Performance** — images cached using `cached_network_image`, lazy loading for lists, and stream-based updates to reduce UI thrash.
+- **Responsiveness** — layouts adapt to different screen sizes and orientations (mobile & tablet).
+- **Notifications & Alerts** — subtle animations and notifications for appointments, payments, and messages, enhancing user experience without being intrusive.
+- **Accessibility** — high contrast colors, legible fonts, clear button sizes, and ARIA-friendly text for screen readers.
 
 ---
 
@@ -92,7 +95,7 @@ This layout helps keep features self-contained and easier to test.
 
 ```bash
 # Clone
-git clone https://github.com/omarShawkey13/piko.git
+git clone https://github.com/AzaKhaled/Medical_Service.git
 cd Medical_Service 
 
 # Install
